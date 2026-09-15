@@ -25,7 +25,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-mono">
         {/* Left: Clean Identity, Copyright & Availability Status */}
         <div className="flex flex-col sm:flex-row items-center gap-3 text-[#D7E2EA]/50 text-center sm:text-left">
-          <span className="font-semibold text-white tracking-wider uppercase font-kanit text-sm">
+          <span className="font-kanit font-black tracking-widest text-base uppercase bg-gradient-to-r from-[#F030C8] via-[#B600A8] to-[#8C1BAB] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(182,0,168,0.5)]">
             RAJESH KUMAR
           </span>
           <span className="hidden sm:inline text-white/20">•</span>

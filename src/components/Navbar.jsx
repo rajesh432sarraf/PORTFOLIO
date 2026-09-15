@@ -89,14 +89,21 @@ export function Navbar() {
           aria-label="Main Navigation"
         >
           {/* Brand Logo / Identity - Extreme Left */}
-          <a
+          <motion.a
             href="#"
-            className="group flex items-center gap-2 text-sm sm:text-base font-medium tracking-widest uppercase text-[#D7E2EA] hover:opacity-80 transition-opacity duration-200 flex-shrink-0"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            className="group flex items-center gap-3 text-lg sm:text-xl lg:text-2xl font-black tracking-widest uppercase flex-shrink-0 select-none cursor-pointer"
             aria-label="Rajesh Kumar Home"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold tracking-wide">RAJESH KUMAR</span>
-          </a>
+            <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B600A8] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E000B8] shadow-[0_0_10px_#E000B8]"></span>
+            </span>
+            <span className="font-kanit font-black tracking-wider bg-gradient-to-r from-[#F030C8] via-[#B600A8] to-[#8C1BAB] bg-clip-text text-transparent drop-shadow-[0_0_16px_rgba(182,0,168,0.6)] group-hover:drop-shadow-[0_0_22px_rgba(224,0,184,0.85)] transition-all duration-300">
+              RAJESH KUMAR
+            </span>
+          </motion.a>
 
           {/* Right Aligned Navigation Group (Links + Action Buttons) */}
           <div className="flex items-center gap-6 lg:gap-10 ml-auto">
