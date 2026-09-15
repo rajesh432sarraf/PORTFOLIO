@@ -6,11 +6,13 @@ export function MessageManager() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentMsg, setCurrentMsg] = useState(null);
 
-  const loadMessages = () => {
+  const loadMessages = async () => {
+    // 1. Instant load from local storage
     try {
       const saved = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-      if (saved.length === 0) {
-        // Default initial sample
+      if (saved.length > 0) {
+        setMessages(saved);
+      } else {
         const initial = [
           {
             _id: 'sample_1',
@@ -25,11 +27,32 @@ export function MessageManager() {
         ];
         setMessages(initial);
         localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(initial));
-      } else {
-        setMessages(saved);
       }
     } catch (e) {
       setMessages([]);
+    }
+
+    // 2. Fetch from cloud serverless endpoint if available
+    try {
+      const response = await fetch('/api/contact');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+          const currentLocal = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
+          const messageMap = new Map();
+          // Keep local entries
+          currentLocal.forEach((m) => messageMap.set(m._id || m.id, m));
+          // Overlay server entries
+          data.messages.forEach((m) => messageMap.set(m._id || m.id, m));
+          const merged = Array.from(messageMap.values()).sort(
+            (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          );
+          setMessages(merged);
+          localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(merged));
+        }
+      }
+    } catch (apiErr) {
+      // Offline or local environment without serverless function active
     }
   };
 

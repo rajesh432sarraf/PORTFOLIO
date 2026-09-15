@@ -87,6 +87,27 @@ export function Contact() {
     setErrorMessage('');
 
     try {
+      // Direct Web3Forms submission if access key configured in client env
+      const web3Key = import.meta.env.VITE_PUBLIC_WEB3FORMS_KEY;
+      if (web3Key) {
+        try {
+          await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: web3Key,
+              name: formData.name,
+              email: formData.email,
+              subject: formData.subject || `[Portfolio] Inquiry from ${formData.name}`,
+              message: formData.message,
+              from_name: 'Rajesh Portfolio Website',
+            }),
+          });
+        } catch (web3Err) {
+          console.warn('Web3Forms client notification warning:', web3Err);
+        }
+      }
+
       // Try sending to the serverless contact API endpoint
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -99,28 +120,22 @@ export function Contact() {
         }),
       });
 
-      if (response.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
-      } else {
-        // In local Vite dev environment where serverless functions aren't active,
-        // store locally in demo messages store for seamless testing and mark success
-        const savedMessages = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-        savedMessages.unshift({
-          _id: `msg_${Date.now()}`,
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject || 'General Inquiry',
-          message: formData.message,
-          createdAt: new Date().toISOString(),
-          status: 'new',
-        });
-        localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(savedMessages));
-        window.dispatchEvent(new Event('portfolio_data_updated'));
+      // Always backup in local storage for offline / single-device testing
+      const savedMessages = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
+      savedMessages.unshift({
+        _id: `msg_${Date.now()}`,
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || 'General Inquiry',
+        message: formData.message,
+        createdAt: new Date().toISOString(),
+        status: 'new',
+      });
+      localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(savedMessages));
+      window.dispatchEvent(new Event('portfolio_data_updated'));
 
-        setStatus('success');
-        setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
-      }
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
     } catch (err) {
       // Resilient fallback for local testing
       const savedMessages = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');

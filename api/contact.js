@@ -4,7 +4,31 @@
  */
 
 export default async function handler(req, res) {
-  // Only accept POST requests
+  // Handle GET request to fetch messages (for Admin CMS)
+  if (req.method === 'GET') {
+    if (process.env.MONGODB_URI) {
+      try {
+        const { MongoClient } = await import('mongodb');
+        const client = new MongoClient(process.env.MONGODB_URI);
+        await client.connect();
+        const db = client.db(process.env.MONGODB_DB_NAME || 'portfolio');
+        const messages = await db
+          .collection('messages')
+          .find()
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .toArray();
+        await client.close();
+        return res.status(200).json({ success: true, messages });
+      } catch (err) {
+        console.error('MongoDB fetch error:', err.message);
+        return res.status(200).json({ success: false, messages: [], error: err.message });
+      }
+    }
+    return res.status(200).json({ success: true, messages: [] });
+  }
+
+  // Only accept POST requests for submissions
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -14,7 +38,6 @@ export default async function handler(req, res) {
 
     // 1. Honeypot check for spam bots
     if (honeypot) {
-      // Return 200 to fool bots without doing work
       return res.status(200).json({ success: true, message: 'Message received' });
     }
 
@@ -35,7 +58,28 @@ export default async function handler(req, res) {
     const cleanSubject = (subject || 'Portfolio Contact').substring(0, 150);
     const timestamp = new Date().toISOString();
 
-    // 3. MongoDB Persistence (if configured via MONGODB_URI)
+    // 3. Web3Forms Direct Email Delivery (Zero-setup free email to sarrafrajesh13@gmail.com)
+    const web3Key = process.env.WEB3FORMS_ACCESS_KEY || process.env.VITE_PUBLIC_WEB3FORMS_KEY;
+    if (web3Key) {
+      try {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: web3Key,
+            name: name.trim(),
+            email: email.trim(),
+            subject: `[Portfolio] ${cleanSubject} from ${name}`,
+            message: message.trim(),
+            from_name: 'Rajesh Portfolio Website',
+          }),
+        });
+      } catch (web3Err) {
+        console.error('Web3Forms dispatch error:', web3Err.message);
+      }
+    }
+
+    // 4. MongoDB Persistence (if configured via MONGODB_URI)
     if (process.env.MONGODB_URI) {
       try {
         const { MongoClient } = await import('mongodb');
@@ -53,11 +97,10 @@ export default async function handler(req, res) {
         await client.close();
       } catch (dbErr) {
         console.error('MongoDB connection error:', dbErr.message);
-        // Continue to notification even if db log has an issue
       }
     }
 
-    // 4. Email Notification via Resend (if configured via RESEND_API_KEY)
+    // 5. Email Notification via Resend (if configured via RESEND_API_KEY)
     if (process.env.RESEND_API_KEY) {
       try {
         await fetch('https://api.resend.com/emails', {
@@ -76,7 +119,7 @@ export default async function handler(req, res) {
               <p><strong>Email:</strong> ${email}</p>
               <p><strong>Subject:</strong> ${cleanSubject}</p>
               <p><strong>Message:</strong></p>
-              <blockquote style="background: #f4f4f4; padding: 12px; border-left: 4px solid #7621B0;">
+              <blockquote style="background: #f4f4f4; padding: 12px; border-left: 4px solid #7621B0; color: #111;">
                 ${message.replace(/\n/g, '<br/>')}
               </blockquote>
               <p><small>Received at: ${timestamp}</small></p>
