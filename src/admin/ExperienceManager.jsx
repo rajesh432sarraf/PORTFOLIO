@@ -187,8 +187,12 @@ export function ExperienceManager() {
 
       {/* Edit / Create Experience Modal */}
       {isEditing && currentExp && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0E0E0E] border border-white/15 p-6 sm:p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+          <div
+            data-lenis-prevent="true"
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain custom-scrollbar rounded-3xl bg-[#0E0E0E] border border-white/15 p-6 sm:p-8 shadow-2xl"
+            style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+          >
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
               <h3 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-white font-kanit">
                 {currentExp._index >= 0 ? 'Edit Experience' : 'Add New Experience'}

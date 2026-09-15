@@ -24,8 +24,10 @@ export function App() {
     Boolean(sessionStorage.getItem('rajesh_portfolio_admin_token'))
   );
 
-  // Initialize smooth scrolling globally for public pages
-  useLenis();
+  const isPublicPage = !currentPath.startsWith('/admin');
+
+  // Initialize smooth scrolling globally for public pages only
+  useLenis(isPublicPage);
 
   useEffect(() => {
     const handlePopState = () => {

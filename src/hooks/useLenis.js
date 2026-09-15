@@ -5,10 +5,18 @@ import Lenis from 'lenis';
  * Custom hook to initialize and manage Lenis smooth scrolling.
  * Synchronizes with requestAnimationFrame and cleans up on unmount.
  */
-export function useLenis() {
+export function useLenis(enabled = true) {
   const lenisRef = useRef(null);
 
   useEffect(() => {
+    if (!enabled) {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
+      return;
+    }
+
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
@@ -39,7 +47,7 @@ export function useLenis() {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [enabled]);
 
   return lenisRef;
 }
