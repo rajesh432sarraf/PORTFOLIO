@@ -36,7 +36,7 @@ export function Projects() {
   return (
     <section
       id="projects"
-      className="relative w-full bg-[#0C0C0C] text-[#D7E2EA] px-5 sm:px-8 lg:px-12 py-24 sm:py-32 overflow-hidden"
+      className="relative w-full bg-[#0C0C0C] text-[#D7E2EA] px-5 sm:px-8 lg:px-12 py-24 sm:py-32"
       aria-label="Selected Projects"
     >
       <div className="max-w-7xl mx-auto">

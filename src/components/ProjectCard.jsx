@@ -6,7 +6,7 @@ export function ProjectCard({ project, index, totalCards }) {
   const hasGithub = Boolean(project.github && project.github.trim().length > 0);
 
   // Offset each card so the top header bar of the previous card stays visible
-  const topOffset = 80 + index * 52;
+  const topOffset = 85 + index * 60;
   const isLast = index === totalCards - 1;
 
   return (
@@ -14,9 +14,9 @@ export function ProjectCard({ project, index, totalCards }) {
       style={{
         top: `${topOffset}px`,
         zIndex: index + 10,
-        marginBottom: isLast ? '0px' : '180px',
+        marginBottom: isLast ? '60px' : '400px',
       }}
-      className="sticky w-full max-w-7xl mx-auto rounded-[28px] sm:rounded-[38px] md:rounded-[48px] bg-[#0E0E0E] border border-white/20 p-6 sm:p-8 md:p-10 shadow-[0_-18px_40px_rgba(0,0,0,0.85),0_25px_60px_rgba(0,0,0,0.9)] transition-all duration-300"
+      className="sticky w-full max-w-7xl mx-auto rounded-[28px] sm:rounded-[36px] md:rounded-[44px] bg-[#0E0E0E] border border-white/20 p-6 sm:p-8 md:p-10 shadow-[0_-25px_50px_rgba(0,0,0,0.95),0_30px_70px_rgba(0,0,0,0.9)] transition-all duration-300"
     >
       {/* TOP HEADER ROW: 01 + CATEGORY/TITLE + LIVE PROJECT BUTTON */}
       <div className="flex items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
@@ -95,16 +95,7 @@ export function ProjectCard({ project, index, totalCards }) {
               className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
-
-            <div className="absolute bottom-4 left-5 sm:bottom-6 sm:left-7 pointer-events-none">
-              <span className="text-xs uppercase tracking-widest text-white/50 font-mono">
-                {project.category}
-              </span>
-              <p className="text-lg sm:text-xl font-bold uppercase text-white tracking-wide">
-                {project.title}
-              </p>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
