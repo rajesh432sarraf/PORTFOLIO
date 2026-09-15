@@ -53,52 +53,73 @@ export function ProjectCard({ project, index, totalCards }) {
       </div>
 
       {/* ASYMMETRIC 3-IMAGE EDITORIAL GALLERY */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        {/* Left Column: 2 Stacked Rounded Images (40% desktop) */}
-        <div className="hidden lg:flex lg:col-span-5 flex-col gap-4 sm:gap-6">
-          <div
-            className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[26px] border border-white/10 bg-neutral-900"
-            style={{ height: 'clamp(150px, 16vw, 210px)' }}
-          >
-            <img
-              src={project.gallery[0] || project.image}
-              alt={`${project.title} detail 1`}
-              className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
-          </div>
+      {(() => {
+        const galleryList = Array.isArray(project.gallery) ? project.gallery : [];
+        const mainCover = project.image || galleryList[0] || '/images/projects/cutzen-main.jpg';
+        const img1 = galleryList[0] || mainCover;
+        const img2 = galleryList[1] || mainCover;
 
-          <div
-            className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[26px] border border-white/10 bg-neutral-900"
-            style={{ height: 'clamp(170px, 18vw, 230px)' }}
-          >
-            <img
-              src={project.gallery[1] || project.image}
-              alt={`${project.title} detail 2`}
-              className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
-          </div>
-        </div>
+        return (
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+            {/* Left Column: 2 Stacked Rounded Images (40% desktop) */}
+            <div className="hidden lg:flex lg:col-span-5 flex-col gap-4 sm:gap-6">
+              <div
+                className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[26px] border border-white/10 bg-neutral-900"
+                style={{ height: 'clamp(150px, 16vw, 210px)' }}
+              >
+                <img
+                  src={img1}
+                  alt={`${project.title} detail 1`}
+                  className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/projects/cutzen-main.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
+              </div>
 
-        {/* Right Column: 1 Large Main Preview Image (60% desktop) */}
-        <div className="col-span-1 lg:col-span-7">
-          <div
-            className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[28px] md:rounded-[32px] border border-white/10 bg-neutral-900"
-            style={{ height: 'clamp(240px, 35vw, 456px)' }}
-          >
-            <img
-              src={project.image}
-              alt={`${project.title} main interface view`}
-              className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              <div
+                className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[26px] border border-white/10 bg-neutral-900"
+                style={{ height: 'clamp(170px, 18vw, 230px)' }}
+              >
+                <img
+                  src={img2}
+                  alt={`${project.title} detail 2`}
+                  className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/projects/cutzen-main.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Right Column: 1 Large Main Preview Image (60% desktop) */}
+            <div className="col-span-1 lg:col-span-7">
+              <div
+                className="group relative w-full overflow-hidden rounded-[20px] sm:rounded-[28px] md:rounded-[32px] border border-white/10 bg-neutral-900"
+                style={{ height: 'clamp(240px, 35vw, 456px)' }}
+              >
+                <img
+                  src={mainCover}
+                  alt={`${project.title} main interface view`}
+                  className="w-full h-full object-cover filter brightness-95 transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/projects/cutzen-main.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* FOOTER ROW: DESCRIPTION & TECHNOLOGIES */}
       <div className="mt-5 flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-white/[0.06]">

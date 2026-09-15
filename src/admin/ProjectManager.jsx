@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash } from 'lucide-react';
 import { projects as initialProjects } from '../data/projects.js';
 
 export function ProjectManager() {
   const [projectList, setProjectList] = useState(() => {
     try {
       const saved = localStorage.getItem('rajesh_portfolio_projects');
-      return saved ? JSON.parse(saved) : initialProjects;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return initialProjects;
     } catch (e) {
       return initialProjects;
     }
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
+  const [techInput, setTechInput] = useState('');
 
   const saveToStorage = (updated) => {
     setProjectList(updated);
@@ -37,207 +43,495 @@ export function ProjectManager() {
   };
 
   const handleOpenEdit = (project) => {
-    setCurrentProject(project);
+    setCurrentProject({
+      ...project,
+      gallery: project.gallery || [project.image || '', '', ''],
+    });
+    setTechInput(Array.isArray(project.technologies) ? project.technologies.join(', ') : '');
     setIsEditing(true);
   };
 
   const handleOpenNew = () => {
+    const num = (projectList.length + 1).toString().padStart(2, '0');
     setCurrentProject({
       id: `proj_${Date.now()}`,
-      number: `0${projectList.length + 1}`,
+      number: num,
       title: '',
-      category: 'AI / WEB PRODUCT',
+      category: 'WEB APPLICATION / AI PRODUCT',
       year: new Date().getFullYear().toString(),
       description: '',
-      technologies: ['React', 'JavaScript'],
-      image: '/images/projects/cutzen-main.jpg',
-      gallery: ['/images/projects/cutzen-main.jpg'],
+      technologies: ['React', 'JavaScript', 'Tailwind CSS'],
+      image: '',
+      gallery: ['', '', ''],
       github: '',
       live: '',
       featured: true,
     });
+    setTechInput('React, JavaScript, Tailwind CSS');
     setIsEditing(true);
+  };
+
+  const handleImageFileUpload = (e, galleryIndex = null) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image file size should be less than 10MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (!dataUrl) return;
+
+      if (galleryIndex === null) {
+        setCurrentProject((prev) => {
+          const galleryCopy = [...(prev.gallery || ['', '', ''])];
+          if (!galleryCopy[0]) galleryCopy[0] = dataUrl;
+          if (!galleryCopy[1]) galleryCopy[1] = dataUrl;
+          return {
+            ...prev,
+            image: dataUrl,
+            gallery: galleryCopy,
+          };
+        });
+      } else {
+        setCurrentProject((prev) => {
+          const galleryCopy = [...(prev.gallery || ['', '', ''])];
+          galleryCopy[galleryIndex] = dataUrl;
+          return { ...prev, gallery: galleryCopy };
+        });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    const exists = projectList.find((p) => p.id === currentProject.id);
+
+    const techArray = techInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
+    const mainImg = currentProject.image || currentProject.gallery?.[0] || '/images/projects/cutzen-main.jpg';
+    const galleryImgs = [
+      currentProject.gallery?.[0] || mainImg,
+      currentProject.gallery?.[1] || mainImg,
+      currentProject.gallery?.[2] || mainImg,
+    ];
+
+    const projectToSave = {
+      ...currentProject,
+      title: currentProject.title.trim(),
+      category: currentProject.category.trim(),
+      description: currentProject.description.trim(),
+      technologies: techArray.length > 0 ? techArray : ['React', 'Web App'],
+      image: mainImg,
+      gallery: galleryImgs,
+      github: currentProject.github?.trim() || '',
+      live: currentProject.live?.trim() || '',
+    };
+
+    const exists = projectList.find((p) => p.id === projectToSave.id);
     let updated;
     if (exists) {
-      updated = projectList.map((p) => (p.id === currentProject.id ? currentProject : p));
+      updated = projectList.map((p) => (p.id === projectToSave.id ? projectToSave : p));
     } else {
-      updated = [...projectList, currentProject];
+      updated = [projectToSave, ...projectList];
     }
+
     saveToStorage(updated);
     setIsEditing(false);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold uppercase tracking-tight text-white">
-            Projects Management
+          <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
+            Projects Management & Showcase
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Create, edit, feature, and manage portfolio project showcases.
+            Add new projects, upload screenshots, feature items, and edit details in real-time.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-neutral-200 transition-colors cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>New Project</span>
         </button>
       </div>
 
-      {/* Projects Table */}
+      {/* Projects Grid / Table */}
       <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/40 bg-white/[0.02]">
-              <th className="py-3.5 px-4">#</th>
-              <th className="py-3.5 px-4">Title</th>
-              <th className="py-3.5 px-4">Category</th>
-              <th className="py-3.5 px-4">Year</th>
-              <th className="py-3.5 px-4">Featured</th>
-              <th className="py-3.5 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.06] text-xs">
-            {projectList.map((p) => (
-              <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                <td className="py-4 px-4 font-mono text-white/40">{p.number}</td>
-                <td className="py-4 px-4 font-semibold text-white">
-                  <div className="flex items-center gap-2">
-                    <span>{p.title}</span>
-                    {p.live && (
-                      <a href={p.live} target="_blank" rel="noreferrer" className="text-white/40 hover:text-white">
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </td>
-                <td className="py-4 px-4 text-white/60 font-mono text-[11px]">{p.category}</td>
-                <td className="py-4 px-4 text-white/60 font-mono">{p.year}</td>
-                <td className="py-4 px-4">
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeatured(p.id)}
-                    className={`p-1.5 rounded-lg border transition-colors ${
-                      p.featured
-                        ? 'bg-amber-400/10 border-amber-400/30 text-amber-400'
-                        : 'bg-white/[0.02] border-white/10 text-white/30'
-                    }`}
-                    title="Toggle featured showcase"
-                  >
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                  </button>
-                </td>
-                <td className="py-4 px-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(p)}
-                      className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[650px]">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/40 bg-white/[0.02]">
+                <th className="py-3.5 px-4">#</th>
+                <th className="py-3.5 px-4">Cover</th>
+                <th className="py-3.5 px-4">Title &amp; Category</th>
+                <th className="py-3.5 px-4">Year</th>
+                <th className="py-3.5 px-4">Featured</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-white/[0.06] text-xs">
+              {projectList.map((p) => (
+                <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-4 font-mono text-white/40 font-bold">{p.number}</td>
+                  
+                  {/* Thumbnail Preview */}
+                  <td className="py-4 px-4">
+                    <div className="w-14 h-10 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative">
+                      {p.image ? (
+                        <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/30">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="py-4 px-4">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 font-bold text-white text-sm">
+                        <span>{p.title}</span>
+                        {p.live && (
+                          <a href={p.live} target="_blank" rel="noreferrer" className="text-purple-400 hover:text-purple-300">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-mono text-white/50">{p.category}</span>
+                    </div>
+                  </td>
+
+                  <td className="py-4 px-4 text-white/60 font-mono">{p.year}</td>
+
+                  <td className="py-4 px-4">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFeatured(p.id)}
+                      className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                        p.featured
+                          ? 'bg-amber-400/10 border-amber-400/30 text-amber-400'
+                          : 'bg-white/[0.02] border-white/10 text-white/30'
+                      }`}
+                      title="Toggle featured showcase"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-current" />
+                    </button>
+                  </td>
+
+                  <td className="py-4 px-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(p)}
+                        className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
+                        title="Edit project & photos"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(p.id)}
+                        className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Delete project"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Edit/Create Modal */}
+      {/* Edit / Create Project Modal with Full Photo Upload */}
       {isEditing && currentProject && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0E0E0E] border border-white/15 p-6 sm:p-8 shadow-2xl">
-            <h3 className="text-xl font-bold uppercase tracking-tight text-white mb-6">
-              {currentProject.title ? `Edit ${currentProject.title}` : 'Create New Project'}
-            </h3>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#0E0E0E] border border-white/20 p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <h3 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
+                {currentProject.title ? `Edit "${currentProject.title}"` : 'Create New Project'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="p-1.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSave} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSave} className="space-y-6">
+              {/* Row 1: Title & Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Title</label>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold">
+                    Project Title *
+                  </label>
                   <input
                     type="text"
                     required
+                    placeholder="e.g. KAAGAZ – DOCUMENT SYSTEM"
                     value={currentProject.title}
                     onChange={(e) => setCurrentProject({ ...currentProject, title: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Category</label>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold">
+                    Category *
+                  </label>
                   <input
                     type="text"
                     required
+                    placeholder="e.g. WEB APPLICATION / AI PRODUCT"
                     value={currentProject.category}
                     onChange={(e) => setCurrentProject({ ...currentProject, category: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
                   />
                 </div>
               </div>
 
+              {/* Row 2: Sequence Number & Year */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold flex items-center gap-1">
+                    <Hash className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Project Number (#)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 05"
+                    value={currentProject.number || '05'}
+                    onChange={(e) => setCurrentProject({ ...currentProject, number: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Year</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2026"
+                    value={currentProject.year || '2026'}
+                    onChange={(e) => setCurrentProject({ ...currentProject, year: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
               <div>
-                <label className="text-xs font-mono uppercase text-white/60 block mb-1">Description</label>
+                <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold">
+                  Description *
+                </label>
                 <textarea
                   rows="3"
                   required
+                  placeholder="Describe key features, technical architecture, problem solved..."
                   value={currentProject.description}
                   onChange={(e) => setCurrentProject({ ...currentProject, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-light leading-relaxed"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Tech Stack */}
+              <div>
+                <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold flex items-center gap-1">
+                  <Code className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Technologies (Comma Separated)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. React 18, Node.js, Tailwind CSS, MongoDB"
+                  value={techInput}
+                  onChange={(e) => setTechInput(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-mono"
+                />
+              </div>
+
+              {/* SECTION: MAIN FEATURED COVER PHOTO UPLOAD */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-purple-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono uppercase text-purple-300 font-bold flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-purple-400" />
+                    <span>Main Featured Cover Photo (Primary Showcase Image)</span>
+                  </label>
+                  {currentProject.image && (
+                    <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Image Uploaded
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* Thumbnail Preview Box */}
+                  <div className="w-full sm:w-36 h-24 rounded-xl overflow-hidden bg-neutral-900 border border-white/20 flex-shrink-0 relative group">
+                    {currentProject.image ? (
+                      <img
+                        src={currentProject.image}
+                        alt="Main cover preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-white/30 text-[10px] font-mono p-2 text-center">
+                        <ImageIcon className="w-5 h-5 mb-1 opacity-50" />
+                        <span>No Photo Selected</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upload Controls */}
+                  <div className="flex-1 w-full space-y-2">
+                    <div className="flex items-center gap-2">
+                      <label className="px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-purple-200 text-xs font-semibold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Choose Photo File</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageFileUpload(e, null)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+
+                    <p className="text-[10px] font-mono text-white/40">
+                      Upload any screenshot/photo from your PC (.png, .jpg, .webp). Or paste image URL below:
+                    </p>
+
+                    <input
+                      type="text"
+                      placeholder="Or enter Image URL: https://... or /images/projects/..."
+                      value={currentProject.image || ''}
+                      onChange={(e) => setCurrentProject({ ...currentProject, image: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: GALLERY SCREENSHOTS (3 IMAGES FOR EDITORIAL CARD) */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                <label className="text-xs font-mono uppercase text-white/80 font-bold block">
+                  Project Gallery Screenshots (3 Card Screenshots)
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[0, 1, 2].map((idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-black/30 border border-white/10 space-y-2">
+                      <span className="text-[10px] font-mono uppercase text-white/50 block">
+                        Screenshot #{idx + 1}
+                      </span>
+
+                      {/* Preview Box */}
+                      <div className="w-full h-20 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative">
+                        {currentProject.gallery?.[idx] ? (
+                          <img
+                            src={currentProject.gallery[idx]}
+                            alt={`Gallery screenshot ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/20 text-[10px] font-mono">
+                            <span>Photo #{idx + 1}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* File Upload Button */}
+                      <label className="w-full py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-white/80 text-[11px] font-mono uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
+                        <Upload className="w-3 h-3 text-purple-400" />
+                        <span>Upload Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageFileUpload(e, idx)}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {/* URL Input */}
+                      <input
+                        type="text"
+                        placeholder="Image URL link"
+                        value={currentProject.gallery?.[idx] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCurrentProject((prev) => {
+                            const newGallery = [...(prev.gallery || ['', '', ''])];
+                            newGallery[idx] = val;
+                            return { ...prev, gallery: newGallery };
+                          });
+                        }}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/50 border border-white/10 text-white text-[10px] font-mono focus:outline-none focus:border-purple-400"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Row: GitHub & Live Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">GitHub URL</label>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold">
+                    GitHub URL
+                  </label>
                   <input
                     type="text"
+                    placeholder="https://github.com/..."
                     value={currentProject.github || ''}
                     onChange={(e) => setCurrentProject({ ...currentProject, github: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Live URL</label>
+                  <label className="text-xs font-mono uppercase text-white/70 block mb-1.5 font-semibold">
+                    Live Demo URL
+                  </label>
                   <input
                     type="text"
+                    placeholder="https://..."
                     value={currentProject.live || ''}
                     onChange={(e) => setCurrentProject({ ...currentProject, live: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-3">
+              {/* Submit Buttons */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10"
+                  className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200"
+                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
                 >
-                  Save Project
+                  Save Project &amp; Photos
                 </button>
               </div>
             </form>
