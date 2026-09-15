@@ -14,7 +14,7 @@ export function Projects() {
     async function loadAll() {
       try {
         const data = await fetchProjectsFromDatabase(initialProjects);
-        if (isMounted && data && Array.isArray(data) && data.length > 0) {
+        if (isMounted && data && Array.isArray(data)) {
           setProjectList(data);
         }
       } catch (e) {}
@@ -25,7 +25,7 @@ export function Projects() {
     const handleUpdate = async () => {
       try {
         const data = await fetchProjectsFromDatabase(initialProjects);
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (data && Array.isArray(data)) {
           setProjectList(data);
         }
       } catch (e) {}

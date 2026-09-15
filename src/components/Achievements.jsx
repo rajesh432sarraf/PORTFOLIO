@@ -3,36 +3,43 @@ import { motion } from 'framer-motion';
 import { Trophy, Award } from 'lucide-react';
 import FadeIn from './FadeIn.jsx';
 import { achievements as initialAchievements } from '../data/achievements.js';
+import { fetchContentFromDatabase } from '../services/storageService.js';
 
 export function Achievements() {
-  const [achievementList, setAchievementList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_achievements');
-      return saved ? JSON.parse(saved) : initialAchievements;
-    } catch (e) {
-      return initialAchievements;
-    }
-  });
+  const [achievementList, setAchievementList] = useState(initialAchievements);
 
   useEffect(() => {
-    const handleUpdate = () => {
+    let isMounted = true;
+    const loadAch = async () => {
       try {
-        const saved = localStorage.getItem('rajesh_portfolio_achievements');
-        if (saved) {
-          setAchievementList(JSON.parse(saved));
+        const data = await fetchContentFromDatabase('achievements', initialAchievements);
+        if (isMounted && Array.isArray(data)) {
+          setAchievementList(data);
         }
-      } catch (e) {
-        console.error('Failed to sync achievements', e);
-      }
+      } catch (e) {}
+    };
+
+    loadAch();
+
+    const handleUpdate = async () => {
+      try {
+        const data = await fetchContentFromDatabase('achievements', initialAchievements);
+        if (Array.isArray(data)) {
+          setAchievementList(data);
+        }
+      } catch (e) {}
     };
 
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
+      isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
+
+  if (!achievementList || achievementList.length === 0) {
+    return null;
+  }
 
   return (
     <section

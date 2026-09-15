@@ -1,37 +1,41 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Briefcase, MapPin, Calendar, Building, X } from 'lucide-react';
-import { experiences as initialExperiences } from '../data/experience.js';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, Briefcase, MapPin, Calendar, Building, X, RefreshCw } from 'lucide-react';
+import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function ExperienceManager() {
-  const [experienceList, setExperienceList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_experience');
-      return saved ? JSON.parse(saved) : initialExperiences;
-    } catch (e) {
-      return initialExperiences;
-    }
-  });
-
+  const [experienceList, setExperienceList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentExp, setCurrentExp] = useState(null);
   const [techInput, setTechInput] = useState('');
+  const [experienceToDelete, setExperienceToDelete] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const saveToStorage = (updated) => {
-    setExperienceList(updated);
+  const loadExperiences = async () => {
+    setIsLoading(true);
     try {
-      localStorage.setItem('rajesh_portfolio_experience', JSON.stringify(updated));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
+      const data = await fetchContentFromDatabase('experience', []);
+      setExperienceList(Array.isArray(data) ? data : []);
     } catch (e) {
-      console.error('Failed to save experience to localStorage', e);
+      console.error('Failed to load experience from database', e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this experience record?')) {
-      const updated = experienceList.filter((_, i) => i !== index);
-      saveToStorage(updated);
-    }
-  };
+  useEffect(() => {
+    loadExperiences();
+
+    const handleUpdate = () => {
+      fetchContentFromDatabase('experience', []).then((data) => {
+        if (Array.isArray(data)) setExperienceList(data);
+      });
+    };
+
+    window.addEventListener('portfolio_data_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_data_updated', handleUpdate);
+  }, []);
 
   const handleOpenEdit = (exp, index) => {
     setCurrentExp({ ...exp, _index: index });
@@ -42,6 +46,7 @@ export function ExperienceManager() {
   const handleOpenNew = () => {
     setCurrentExp({
       _index: -1,
+      id: `exp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       role: '',
       organization: '',
       period: '2025',
@@ -53,7 +58,7 @@ export function ExperienceManager() {
     setIsEditing(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const techArray = techInput
       .split(',')
@@ -61,6 +66,7 @@ export function ExperienceManager() {
       .filter(Boolean);
 
     const expToSave = {
+      id: currentExp.id || `exp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       role: currentExp.role.trim(),
       organization: currentExp.organization.trim(),
       period: currentExp.period.trim(),
@@ -76,8 +82,31 @@ export function ExperienceManager() {
       updated = [expToSave, ...experienceList];
     }
 
-    saveToStorage(updated);
+    setIsSaving(true);
+    setExperienceList(updated);
+    await persistContentToDatabase('experience', updated);
+    setIsSaving(false);
     setIsEditing(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!experienceToDelete) return;
+    const targetId = experienceToDelete.id || experienceToDelete.role;
+    setDeletingId(targetId);
+
+    try {
+      if (experienceToDelete.id) {
+        await deleteContentItemFromDatabase('experience', experienceToDelete.id);
+      }
+      const updated = experienceList.filter((_, i) => i !== experienceToDelete._index);
+      setExperienceList(updated);
+      await persistContentToDatabase('experience', updated);
+    } catch (err) {
+      console.error('Failed to delete experience record:', err);
+    } finally {
+      setDeletingId(null);
+      setExperienceToDelete(null);
+    }
   };
 
   return (
@@ -88,7 +117,7 @@ export function ExperienceManager() {
             Experience Management
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add, update, and manage your internships, work roles, and professional contributions.
+            Add, update, and manage your internships, work roles, and professional contributions via MongoDB Database.
           </p>
         </div>
 
@@ -103,49 +132,56 @@ export function ExperienceManager() {
       </div>
 
       {/* Experience Table */}
-      <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
-        {experienceList.length === 0 ? (
+      <div className="rounded-2xl border border-white/10 bg-[#0E0E0E] overflow-hidden">
+        {isLoading ? (
+          <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
+            <span>Loading experience records from database...</span>
+          </div>
+        ) : experienceList.length === 0 ? (
           <div className="p-12 text-center text-white/40 font-mono text-xs">
-            <Briefcase className="w-8 h-8 mx-auto mb-3 opacity-30" />
-            <p>No experience records added yet.</p>
-            <button
-              type="button"
-              onClick={handleOpenNew}
-              className="mt-4 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono transition-colors cursor-pointer"
-            >
-              + Add First Experience
-            </button>
+            No experience records found in database. Click "+ New Experience" to add your work roles.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/40 bg-white/[0.02]">
-                  <th className="py-3.5 px-4">#</th>
-                  <th className="py-3.5 px-4">Role &amp; Title</th>
-                  <th className="py-3.5 px-4">Organization</th>
-                  <th className="py-3.5 px-4">Period</th>
-                  <th className="py-3.5 px-4">Location</th>
-                  <th className="py-3.5 px-4">Tech Stack</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                <tr className="border-b border-white/10 text-white/40 uppercase font-mono tracking-wider">
+                  <th className="py-3.5 px-4 font-normal">#</th>
+                  <th className="py-3.5 px-4 font-normal">Role & Title</th>
+                  <th className="py-3.5 px-4 font-normal">Organization</th>
+                  <th className="py-3.5 px-4 font-normal">Period</th>
+                  <th className="py-3.5 px-4 font-normal">Location</th>
+                  <th className="py-3.5 px-4 font-normal">Tech Stack</th>
+                  <th className="py-3.5 px-4 font-normal text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.06] text-xs">
+              <tbody className="divide-y divide-white/5 font-mono">
                 {experienceList.map((exp, idx) => (
-                  <tr key={`${exp.role}-${idx}`} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-4 px-4 font-mono text-white/40">0{idx + 1}</td>
-                    <td className="py-4 px-4 font-bold text-white max-w-[200px]">
-                      <div>{exp.role}</div>
+                  <tr key={exp.id || idx} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-4 px-4 text-white/40">
+                      {String(idx + 1).padStart(2, '0')}
                     </td>
-                    <td className="py-4 px-4 text-[#BBCCD7] font-mono text-xs">{exp.organization}</td>
-                    <td className="py-4 px-4 text-white/60 font-mono text-xs">{exp.period}</td>
-                    <td className="py-4 px-4 text-white/50 font-mono text-xs">{exp.location}</td>
+                    <td className="py-4 px-4 font-medium text-white">
+                      <span className="font-bold tracking-tight uppercase font-kanit text-sm">
+                        {exp.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-purple-400 uppercase font-semibold">
+                      {exp.organization}
+                    </td>
+                    <td className="py-4 px-4 text-white/60">
+                      {exp.period}
+                    </td>
+                    <td className="py-4 px-4 text-white/60">
+                      {exp.location}
+                    </td>
                     <td className="py-4 px-4">
-                      <div className="flex flex-wrap gap-1 max-w-[220px]">
+                      <div className="flex flex-wrap gap-1 max-w-xs">
                         {exp.technologies?.slice(0, 3).map((t) => (
                           <span
                             key={t}
-                            className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[10px] font-mono text-white/70"
+                            className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-white/70"
                           >
                             {t}
                           </span>
@@ -169,7 +205,7 @@ export function ExperienceManager() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(idx)}
+                          onClick={() => setExperienceToDelete({ ...exp, _index: idx })}
                           className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           title="Delete Experience"
                         >
@@ -215,7 +251,7 @@ export function ExperienceManager() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Web Developer Intern"
+                    placeholder="e.g. FULL-STACK DEVELOPER INTERN"
                     value={currentExp.role}
                     onChange={(e) => setCurrentExp({ ...currentExp, role: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -229,7 +265,7 @@ export function ExperienceManager() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. InAmigos Foundation"
+                    placeholder="e.g. INAMIGOS FOUNDATION"
                     value={currentExp.organization}
                     onChange={(e) => setCurrentExp({ ...currentExp, organization: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -240,12 +276,12 @@ export function ExperienceManager() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Period / Duration *
+                    Period / Year *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 2024 or May 2024 - Aug 2024"
+                    placeholder="e.g. 2024 - 2025"
                     value={currentExp.period}
                     onChange={(e) => setCurrentExp({ ...currentExp, period: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -258,7 +294,7 @@ export function ExperienceManager() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Remote, India / Hyderabad"
+                    placeholder="e.g. Remote, India"
                     value={currentExp.location}
                     onChange={(e) => setCurrentExp({ ...currentExp, location: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -268,15 +304,15 @@ export function ExperienceManager() {
 
               <div>
                 <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                  Description of Contributions &amp; Achievements *
+                  Description / Responsibilities *
                 </label>
                 <textarea
                   rows="4"
                   required
-                  placeholder="Engineered responsive web interfaces, optimized performance, collaborated with core team..."
+                  placeholder="Engineered high-performance interfaces, integrated backend services, streamlined user workflows..."
                   value={currentExp.description}
                   onChange={(e) => setCurrentExp({ ...currentExp, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono leading-relaxed"
                 />
               </div>
 
@@ -299,19 +335,82 @@ export function ExperienceManager() {
               <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
+                  disabled={isSaving}
                   onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors"
+                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors"
+                  disabled={isSaving}
+                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer flex items-center gap-2"
                 >
-                  Save Experience
+                  {isSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : (
+                    <span>Save Experience</span>
+                  )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal (Trace Option) */}
+      {experienceToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
+          <div data-lenis-prevent="true" className="w-full max-w-md rounded-3xl bg-[#0E0E0E] border border-rose-500/30 p-6 sm:p-7 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold uppercase tracking-tight text-white font-kanit">
+                  Delete Experience?
+                </h3>
+                <p className="text-xs text-white/50 font-mono">
+                  Permanent database removal
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-white/70 leading-relaxed font-light">
+              Are you sure you want to delete <span className="text-white font-bold font-mono">"{experienceToDelete.role} at {experienceToDelete.organization}"</span>? This will permanently remove it from both your live portfolio website and the MongoDB database.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={() => setExperienceToDelete(null)}
+                className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={confirmDelete}
+                className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingId ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting from Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Delete Experience</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,40 +1,40 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Award, CheckCircle2, ExternalLink, X } from 'lucide-react';
-import { certifications as initialCertifications } from '../data/certifications.js';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, Award, CheckCircle2, ExternalLink, X, RefreshCw } from 'lucide-react';
+import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function CertificateManager() {
-  const [certList, setCertList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_certifications');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      return initialCertifications;
-    } catch (e) {
-      return initialCertifications;
-    }
-  });
-
+  const [certList, setCertList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentCert, setCurrentCert] = useState(null);
+  const [certToDelete, setCertToDelete] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const saveToStorage = (updated) => {
-    setCertList(updated);
+  const loadCertificates = async () => {
+    setIsLoading(true);
     try {
-      localStorage.setItem('rajesh_portfolio_certifications', JSON.stringify(updated));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
+      const data = await fetchContentFromDatabase('certificates', []);
+      setCertList(Array.isArray(data) ? data : []);
     } catch (e) {
-      console.error('Failed to save certifications to localStorage', e);
+      console.error('Failed to load certificates from database', e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this certificate?')) {
-      const updated = certList.filter((c) => c.id !== id);
-      saveToStorage(updated);
-    }
-  };
+  useEffect(() => {
+    loadCertificates();
+
+    const handleUpdate = () => {
+      fetchContentFromDatabase('certificates', []).then((data) => {
+        if (Array.isArray(data)) setCertList(data);
+      });
+    };
+
+    window.addEventListener('portfolio_data_updated', handleUpdate);
+    return () => window.removeEventListener('portfolio_data_updated', handleUpdate);
+  }, []);
 
   const handleOpenEdit = (cert) => {
     setCurrentCert({ ...cert });
@@ -43,7 +43,7 @@ export function CertificateManager() {
 
   const handleOpenNew = () => {
     setCurrentCert({
-      id: `cert_${Date.now()}`,
+      id: `cert_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       title: '',
       issuer: '',
       year: new Date().getFullYear().toString(),
@@ -53,10 +53,10 @@ export function CertificateManager() {
     setIsEditing(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const certToSave = {
-      id: currentCert.id || `cert_${Date.now()}`,
+      id: currentCert.id || `cert_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       title: currentCert.title.trim(),
       issuer: currentCert.issuer.trim(),
       year: currentCert.year.trim(),
@@ -72,8 +72,31 @@ export function CertificateManager() {
       updated = [certToSave, ...certList];
     }
 
-    saveToStorage(updated);
+    setIsSaving(true);
+    setCertList(updated);
+    await persistContentToDatabase('certificates', updated);
+    setIsSaving(false);
     setIsEditing(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!certToDelete) return;
+    const targetId = certToDelete.id || certToDelete.title;
+    setDeletingId(targetId);
+
+    try {
+      if (certToDelete.id) {
+        await deleteContentItemFromDatabase('certificates', certToDelete.id);
+      }
+      const updated = certList.filter((c) => c.id !== certToDelete.id);
+      setCertList(updated);
+      await persistContentToDatabase('certificates', updated);
+    } catch (err) {
+      console.error('Failed to delete certificate:', err);
+    } finally {
+      setDeletingId(null);
+      setCertToDelete(null);
+    }
   };
 
   return (
@@ -84,7 +107,7 @@ export function CertificateManager() {
             Certifications &amp; Credentials
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add and manage your verified certificates, specialized courses, and licenses.
+            Add and manage your verified certificates, specialized courses, and licenses via MongoDB Database.
           </p>
         </div>
 
@@ -98,50 +121,49 @@ export function CertificateManager() {
         </button>
       </div>
 
-      {/* Certifications Table / Grid */}
+      {/* Certificates Table */}
       <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
-        {certList.length === 0 ? (
+        {isLoading ? (
+          <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
+            <span>Loading certificates from database...</span>
+          </div>
+        ) : certList.length === 0 ? (
           <div className="p-12 text-center text-white/40 font-mono text-xs">
-            <Award className="w-8 h-8 mx-auto mb-3 opacity-30" />
-            <p>No certificates added yet.</p>
-            <p className="text-[11px] text-white/30 mt-1">
-              Add your tech certifications, badges, and verified course links.
-            </p>
-            <button
-              type="button"
-              onClick={handleOpenNew}
-              className="mt-4 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono transition-colors cursor-pointer"
-            >
-              + Add First Certificate
-            </button>
+            No certificates found in database. Click "+ New Certificate" to add your verified credentials.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left text-xs border-collapse font-mono">
               <thead>
-                <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/40 bg-white/[0.02]">
-                  <th className="py-3.5 px-4">#</th>
-                  <th className="py-3.5 px-4">Certificate Title</th>
-                  <th className="py-3.5 px-4">Issuer / Platform</th>
-                  <th className="py-3.5 px-4">Year</th>
-                  <th className="py-3.5 px-4">Badge</th>
-                  <th className="py-3.5 px-4">Link</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                <tr className="border-b border-white/10 text-white/40 uppercase tracking-wider">
+                  <th className="py-3.5 px-4 font-normal">#</th>
+                  <th className="py-3.5 px-4 font-normal">Certificate Title</th>
+                  <th className="py-3.5 px-4 font-normal">Issuer / Platform</th>
+                  <th className="py-3.5 px-4 font-normal">Year</th>
+                  <th className="py-3.5 px-4 font-normal">Badge</th>
+                  <th className="py-3.5 px-4 font-normal">Link</th>
+                  <th className="py-3.5 px-4 font-normal text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.06] text-xs">
+              <tbody className="divide-y divide-white/5">
                 {certList.map((cert, idx) => (
-                  <tr key={cert.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-4 px-4 font-mono text-white/40">0{idx + 1}</td>
-                    <td className="py-4 px-4 font-bold text-white max-w-[220px]">
-                      <div>{cert.title}</div>
+                  <tr key={cert.id || idx} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-4 px-4 text-white/40">
+                      {String(idx + 1).padStart(2, '0')}
                     </td>
-                    <td className="py-4 px-4 text-[#BBCCD7] font-mono text-xs">{cert.issuer}</td>
-                    <td className="py-4 px-4 text-white/60 font-mono text-xs">{cert.year}</td>
+                    <td className="py-4 px-4 text-white font-bold tracking-tight uppercase font-kanit text-sm">
+                      {cert.title}
+                    </td>
+                    <td className="py-4 px-4 text-white/70">
+                      {cert.issuer}
+                    </td>
+                    <td className="py-4 px-4 text-white/50">
+                      {cert.year}
+                    </td>
                     <td className="py-4 px-4">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3" />
-                        {cert.badge}
+                      <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        {cert.badge || 'VERIFIED CREDENTIAL'}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -171,7 +193,7 @@ export function CertificateManager() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(cert.id)}
+                          onClick={() => setCertToDelete(cert)}
                           className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           title="Delete Certificate"
                         >
@@ -216,7 +238,7 @@ export function CertificateManager() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. AWS Certified Cloud Practitioner / Meta Frontend"
+                  placeholder="e.g. Meta Front-End Developer Professional Certificate"
                   value={currentCert.title}
                   onChange={(e) => setCurrentCert({ ...currentCert, title: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -226,12 +248,12 @@ export function CertificateManager() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Issuer / Organization *
+                    Issuing Organization / Platform *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Amazon Web Services / Coursera"
+                    placeholder="e.g. Meta / Coursera"
                     value={currentCert.issuer}
                     onChange={(e) => setCurrentCert({ ...currentCert, issuer: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -240,7 +262,7 @@ export function CertificateManager() {
 
                 <div>
                   <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Year / Date *
+                    Year *
                   </label>
                   <input
                     type="text"
@@ -253,50 +275,111 @@ export function CertificateManager() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Badge Tag
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. VERIFIED CREDENTIAL"
-                    value={currentCert.badge}
-                    onChange={(e) => setCurrentCert({ ...currentCert, badge: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-mono uppercase text-white/60 block mb-1">
+                  Badge Tag / Label
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. VERIFIED CREDENTIAL or HONORS SPECIALIZATION"
+                  value={currentCert.badge}
+                  onChange={(e) => setCurrentCert({ ...currentCert, badge: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
+                />
+              </div>
 
-                <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Credential / Verification URL
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={currentCert.credentialUrl}
-                    onChange={(e) => setCurrentCert({ ...currentCert, credentialUrl: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-mono uppercase text-white/60 block mb-1">
+                  Verification URL / Link
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://coursera.org/verify/..."
+                  value={currentCert.credentialUrl}
+                  onChange={(e) => setCurrentCert({ ...currentCert, credentialUrl: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
+                />
               </div>
 
               <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
+                  disabled={isSaving}
                   onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors"
+                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors"
+                  disabled={isSaving}
+                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer flex items-center gap-2"
                 >
-                  Save Certificate
+                  {isSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : (
+                    <span>Save Certificate</span>
+                  )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal (Trace Option) */}
+      {certToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
+          <div data-lenis-prevent="true" className="w-full max-w-md rounded-3xl bg-[#0E0E0E] border border-rose-500/30 p-6 sm:p-7 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold uppercase tracking-tight text-white font-kanit">
+                  Delete Certificate?
+                </h3>
+                <p className="text-xs text-white/50 font-mono">
+                  Permanent database removal
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-white/70 leading-relaxed font-light">
+              Are you sure you want to delete <span className="text-white font-bold font-mono">"{certToDelete.title}"</span>? This will permanently remove it from both your live portfolio website and the MongoDB database.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={() => setCertToDelete(null)}
+                className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={confirmDelete}
+                className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingId ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting from Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Delete Certificate</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

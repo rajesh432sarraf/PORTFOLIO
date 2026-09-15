@@ -3,41 +3,43 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowUpRight } from 'lucide-react';
 import FadeIn from './FadeIn.jsx';
 import { certifications as initialCertifications } from '../data/certifications.js';
+import { fetchContentFromDatabase } from '../services/storageService.js';
 
 export function Certifications() {
-  const [certList, setCertList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_certifications');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      return initialCertifications;
-    } catch (e) {
-      return initialCertifications;
-    }
-  });
+  const [certList, setCertList] = useState(initialCertifications);
 
   useEffect(() => {
-    const handleUpdate = () => {
+    let isMounted = true;
+    const loadCerts = async () => {
       try {
-        const saved = localStorage.getItem('rajesh_portfolio_certifications');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setCertList(Array.isArray(parsed) && parsed.length > 0 ? parsed : initialCertifications);
+        const data = await fetchContentFromDatabase('certificates', initialCertifications);
+        if (isMounted && Array.isArray(data)) {
+          setCertList(data);
         }
-      } catch (e) {
-        console.error('Failed to sync certifications', e);
-      }
+      } catch (e) {}
+    };
+
+    loadCerts();
+
+    const handleUpdate = async () => {
+      try {
+        const data = await fetchContentFromDatabase('certificates', initialCertifications);
+        if (Array.isArray(data)) {
+          setCertList(data);
+        }
+      } catch (e) {}
     };
 
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
+      isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
+
+  if (!certList || certList.length === 0) {
+    return null;
+  }
 
   return (
     <section

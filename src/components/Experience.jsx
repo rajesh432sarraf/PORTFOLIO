@@ -3,36 +3,43 @@ import { motion } from 'framer-motion';
 import { Briefcase } from 'lucide-react';
 import FadeIn from './FadeIn.jsx';
 import { experiences as initialExperiences } from '../data/experience.js';
+import { fetchContentFromDatabase } from '../services/storageService.js';
 
 export function Experience() {
-  const [experienceList, setExperienceList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_experience');
-      return saved ? JSON.parse(saved) : initialExperiences;
-    } catch (e) {
-      return initialExperiences;
-    }
-  });
+  const [experienceList, setExperienceList] = useState(initialExperiences);
 
   useEffect(() => {
-    const handleUpdate = () => {
+    let isMounted = true;
+    const loadExp = async () => {
       try {
-        const saved = localStorage.getItem('rajesh_portfolio_experience');
-        if (saved) {
-          setExperienceList(JSON.parse(saved));
+        const data = await fetchContentFromDatabase('experience', initialExperiences);
+        if (isMounted && Array.isArray(data)) {
+          setExperienceList(data);
         }
-      } catch (e) {
-        console.error('Failed to sync experience', e);
-      }
+      } catch (e) {}
+    };
+
+    loadExp();
+
+    const handleUpdate = async () => {
+      try {
+        const data = await fetchContentFromDatabase('experience', initialExperiences);
+        if (Array.isArray(data)) {
+          setExperienceList(data);
+        }
+      } catch (e) {}
     };
 
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
+      isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
+
+  if (!experienceList || experienceList.length === 0) {
+    return null;
+  }
 
   return (
     <section

@@ -9,35 +9,22 @@ import { experiences as localExperience } from '../data/experience.js';
 import { achievements as localAchievements } from '../data/achievements.js';
 import { certifications as localCertifications } from '../data/certifications.js';
 import { profiles as localProfiles } from '../data/profiles.js';
+import { fetchProjectsFromDatabase, fetchContentFromDatabase } from './storageService.js';
 
 export async function getProjects() {
-  try {
-    const res = await fetch('/api/content?type=projects');
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.projects && data.projects.length > 0) {
-        return data.projects;
-      }
-    }
-  } catch (err) {
-    // API is offline or unconfigured; fallback to local verified data
-  }
-  return localProjects;
+  return await fetchProjectsFromDatabase(localProjects);
 }
 
 export async function getExperience() {
-  try {
-    const res = await fetch('/api/content?type=experience');
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.experience && data.experience.length > 0) {
-        return data.experience;
-      }
-    }
-  } catch (err) {
-    // Fallback to local verified data
-  }
-  return localExperience;
+  return await fetchContentFromDatabase('experience', localExperience);
+}
+
+export async function getAchievements() {
+  return await fetchContentFromDatabase('achievements', localAchievements);
+}
+
+export async function getCertifications() {
+  return await fetchContentFromDatabase('certificates', localCertifications);
 }
 
 export function getLocalAchievements() {

@@ -285,3 +285,140 @@ export async function deleteProjectFromDatabase(projectId) {
 export function getStoredProjects(fallbackProjects = []) {
   return fallbackProjects;
 }
+
+/**
+ * Generic fetcher for dynamic content (experience, achievements, certificates).
+ * Fetches from MongoDB via /api/content?type={type}, caches in IndexedDB.
+ */
+export async function fetchContentFromDatabase(type, fallbackArray = []) {
+  const cacheKey = `rajesh_portfolio_${type}`;
+  try {
+    const res = await fetch(`/api/content?type=${encodeURIComponent(type)}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data[type])) {
+        await setInIndexedDB(cacheKey, data[type]);
+        return data[type];
+      }
+    }
+  } catch (err) {
+    console.warn(`MongoDB fetch error for ${type}:`, err);
+  }
+
+  // Fallback to IndexedDB cache
+  try {
+    const cached = await getFromIndexedDB(cacheKey);
+    if (cached && Array.isArray(cached)) {
+      return cached;
+    }
+  } catch (e) {}
+
+  return fallbackArray;
+}
+
+/**
+ * Generic persistence for dynamic content (experience, achievements, certificates).
+ * Saves to MongoDB via POST /api/content and updates IndexedDB.
+ */
+export async function persistContentToDatabase(type, itemsArray) {
+  if (!Array.isArray(itemsArray)) return false;
+  const cacheKey = `rajesh_portfolio_${type}`;
+  let dbSuccess = false;
+
+  try {
+    const res = await fetch('/api/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, data: itemsArray }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      dbSuccess = json.success;
+    }
+  } catch (apiErr) {
+    console.warn(`Network error saving ${type} to MongoDB:`, apiErr);
+  }
+
+  await setInIndexedDB(cacheKey, itemsArray);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('portfolio_data_updated'));
+  }
+
+  return dbSuccess;
+}
+
+/**
+ * Generic item deleter from MongoDB Atlas and local cache.
+ */
+export async function deleteContentItemFromDatabase(type, itemId) {
+  if (!itemId) return false;
+  const cacheKey = `rajesh_portfolio_${type}`;
+  let cloudSuccess = false;
+
+  try {
+    const res = await fetch(`/api/content?type=${encodeURIComponent(type)}&id=${encodeURIComponent(itemId)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: itemId }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      cloudSuccess = json.success;
+    }
+  } catch (err) {
+    console.warn(`Error deleting ${type} item from MongoDB:`, err);
+  }
+
+  try {
+    const current = (await getFromIndexedDB(cacheKey)) || [];
+    const filtered = current.filter((item) => (item.id || item._id) !== itemId);
+    await setInIndexedDB(cacheKey, filtered);
+
+    // Sync remaining array with MongoDB
+    try {
+      await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, data: filtered }),
+      });
+    } catch (e) {}
+  } catch (e) {}
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('portfolio_data_updated'));
+  }
+
+  return cloudSuccess;
+}
+
+/**
+ * Deletes a message from MongoDB messages collection.
+ */
+export async function deleteMessageFromDatabase(messageId) {
+  if (!messageId) return false;
+  let cloudSuccess = false;
+
+  try {
+    const res = await fetch(`/api/contact?id=${encodeURIComponent(messageId)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: messageId }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      cloudSuccess = json.success;
+    }
+  } catch (err) {
+    console.warn('Error deleting message from MongoDB:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('portfolio_data_updated'));
+  }
+
+  return cloudSuccess;
+}
