@@ -1,6 +1,18 @@
 # Rajesh Sarraf — Creative Developer Portfolio
 
-A production-ready personal developer portfolio for **Rajesh Sarraf** (B.Tech Computer Science & Engineering student, Developer • Builder • Problem Solver).
+<div align="center">
+
+[![Live Demo](https://img.shields.io/badge/Live_Portfolio-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)](https://portfolio-rajesh432sarrafs-projects.vercel.app)
+[![Admin CMS](https://img.shields.io/badge/Admin_Portal-Live-8A2BE2?style=for-the-badge&logo=shield)](https://portfolio-rajesh432sarrafs-projects.vercel.app/admin)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/rajesh432sarraf/PORTFOLIO)
+[![Build Status](https://img.shields.io/badge/Build-Passing-success?style=for-the-badge&logo=vite)](https://portfolio-rajesh432sarrafs-projects.vercel.app)
+
+### 🌐 Live Website: [https://portfolio-rajesh432sarrafs-projects.vercel.app](https://portfolio-rajesh432sarrafs-projects.vercel.app)
+### 🔐 Live Admin CMS: [https://portfolio-rajesh432sarrafs-projects.vercel.app/admin](https://portfolio-rajesh432sarrafs-projects.vercel.app/admin)
+
+*A production-grade personal developer portfolio & CMS for **Rajesh Sarraf** (B.Tech Computer Science & Engineering student, Developer • Builder • Problem Solver).*
+
+</div>
 
 Built with a dark creative visual identity, oversized typography, Lenis smooth scrolling, Framer Motion editorial reveals, GSAP-enhanced interactions, magnetic controls, database integrations, and a secure Admin CMS.
 
@@ -136,6 +148,11 @@ Navigate to `/admin` or `/admin/login` to access the protected content managemen
 
 ## 📦 Production Build & Deployment
 
+### 🌐 Live Production Links
+* **Live Portfolio Website**: [https://portfolio-rajesh432sarrafs-projects.vercel.app](https://portfolio-rajesh432sarrafs-projects.vercel.app)
+* **Live Admin CMS Portal**: [https://portfolio-rajesh432sarrafs-projects.vercel.app/admin](https://portfolio-rajesh432sarrafs-projects.vercel.app/admin)
+* **GitHub Repository**: [https://github.com/rajesh432sarraf/PORTFOLIO](https://github.com/rajesh432sarraf/PORTFOLIO)
+
 ### 1. Build for Production
 ```bash
 npm run build
@@ -147,8 +164,8 @@ npm run preview
 ```
 
 ### 3. Deploy to Vercel
-Deploy seamlessly using the Vercel CLI or by connecting your GitHub repository:
+Deploy seamlessly by connecting your GitHub repository to Vercel or running:
 ```bash
 vercel
 ```
-The included `vercel.json` automatically configures SPA route rewrites and security headers (`nosniff`, `DENY`, `strict-origin-when-cross-origin`).
+The included `vercel.json` automatically configures SPA route rewrites (`/(.*) -> /index.html`), API routing (`/api/(.*) -> /api/$1`), and security headers (`nosniff`, `DENY`, `strict-origin-when-cross-origin`).
