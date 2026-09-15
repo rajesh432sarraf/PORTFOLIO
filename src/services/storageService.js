@@ -233,6 +233,53 @@ export async function persistProjects(projectsArray) {
 }
 
 /**
+ * Deletes a project by ID directly from MongoDB Atlas Database and local cache.
+ */
+export async function deleteProjectFromDatabase(projectId) {
+  if (!projectId) return false;
+
+  let cloudSuccess = false;
+
+  // 1. Delete on MongoDB Atlas
+  try {
+    const res = await fetch(`/api/content?type=projects&id=${encodeURIComponent(projectId)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: projectId }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      cloudSuccess = json.success;
+    }
+  } catch (err) {
+    console.warn('Error deleting from MongoDB:', err);
+  }
+
+  // 2. Remove from IndexedDB and sync remaining projects
+  try {
+    const current = (await getFromIndexedDB('rajesh_portfolio_projects')) || [];
+    const filtered = current.filter((p) => p.id !== projectId);
+    await setInIndexedDB('rajesh_portfolio_projects', filtered);
+
+    // Sync remaining array to MongoDB to keep collection in sync
+    try {
+      await fetch('/api/content?type=projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'projects', data: filtered }),
+      });
+    } catch (e) {}
+  } catch (e) {}
+
+  // 3. Dispatch cross-component update event
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('portfolio_data_updated'));
+  }
+
+  return cloudSuccess;
+}
+
+/**
  * Loads projects with instant local sync from IndexedDB or initial.
  */
 export function getStoredProjects(fallbackProjects = []) {

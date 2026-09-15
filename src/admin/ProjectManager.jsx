@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash, RefreshCw } from 'lucide-react';
 import { projects as initialProjects } from '../data/projects.js';
-import { compressImage, persistProjects, fetchProjectsFromDatabase } from '../services/storageService.js';
+import { compressImage, persistProjects, fetchProjectsFromDatabase, deleteProjectFromDatabase } from '../services/storageService.js';
 
 const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23141414'/%3E%3Ccircle cx='400' cy='230' r='36' fill='%23222'/%3E%3Ctext x='50%25' y='300' text-anchor='middle' fill='%23666' font-family='monospace' font-size='13' letter-spacing='2'%3EPROJECT SHOWCASE%3C/text%3E%3C/svg%3E";
 
@@ -10,6 +10,8 @@ export function ProjectManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [projectToDelete, setProjectToDelete] = useState(null);
   const [currentProject, setCurrentProject] = useState(null);
   const [techInput, setTechInput] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
@@ -77,10 +79,20 @@ export function ProjectManager() {
     await saveToStorage(updated);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
+  const handleDelete = async (id, title) => {
+    setDeletingId(id);
+    try {
+      await deleteProjectFromDatabase(id);
       const updated = projectList.filter((p) => p.id !== id);
-      await saveToStorage(updated);
+      setProjectList(updated);
+      setSaveNotification(`"${title || 'Project'}" deleted permanently from website & database!`);
+      setTimeout(() => setSaveNotification(''), 4000);
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      setSaveNotification('Error deleting project from database.');
+    } finally {
+      setDeletingId(null);
+      setProjectToDelete(null);
     }
   };
 
@@ -310,9 +322,9 @@ export function ProjectManager() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => setProjectToDelete(p)}
                         className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        title="Delete project"
+                        title="Delete project from website & database"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -628,6 +640,60 @@ export function ProjectManager() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {projectToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-3xl bg-[#0E0E0E] border border-rose-500/30 p-6 sm:p-7 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold uppercase tracking-tight text-white font-kanit">
+                  Delete Project?
+                </h3>
+                <p className="text-xs text-white/50 font-mono">
+                  Permanent database removal
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-white/70 leading-relaxed font-light">
+              Are you sure you want to delete <span className="text-white font-bold font-mono">"{projectToDelete.title}"</span>? This will permanently remove it from both your live portfolio website and the MongoDB database.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={deletingId}
+                onClick={() => setProjectToDelete(null)}
+                className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={() => handleDelete(projectToDelete.id, projectToDelete.title)}
+                className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingId ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting from Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Yes, Delete Project</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
