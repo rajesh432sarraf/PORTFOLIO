@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Trophy, Award, Calendar, ExternalLink, X, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Edit2, Trash2, Trophy, Award, X, RefreshCw, Upload, Image as ImageIcon, Link } from 'lucide-react';
 import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function AchievementManager() {
@@ -10,6 +10,9 @@ export function AchievementManager() {
   const [currentAch, setCurrentAch] = useState(null);
   const [achievementToDelete, setAchievementToDelete] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [imageMode, setImageMode] = useState('upload');
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const loadAchievements = async () => {
     setIsLoading(true);
@@ -25,19 +28,19 @@ export function AchievementManager() {
 
   useEffect(() => {
     loadAchievements();
-
     const handleUpdate = () => {
       fetchContentFromDatabase('achievements', []).then((data) => {
         if (Array.isArray(data)) setAchievementList(data);
       });
     };
-
     window.addEventListener('portfolio_data_updated', handleUpdate);
     return () => window.removeEventListener('portfolio_data_updated', handleUpdate);
   }, []);
 
   const handleOpenEdit = (ach, index) => {
     setCurrentAch({ ...ach, _index: index });
+    setImagePreview(ach.image || null);
+    setImageMode('upload');
     setIsEditing(true);
   };
 
@@ -52,8 +55,53 @@ export function AchievementManager() {
       year: new Date().getFullYear().toString(),
       highlight: 'Competitive Milestone',
       description: '',
+      image: '',
     });
+    setImagePreview(null);
+    setImageMode('upload');
     setIsEditing(true);
+  };
+
+  /* ── Image helpers ── */
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('Please select a valid image file.'); return; }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target.result;
+      if (file.size > 800 * 1024) {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 1200;
+          let { width, height } = img;
+          if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          setImagePreview(compressed);
+          setCurrentAch((prev) => ({ ...prev, image: compressed }));
+        };
+        img.src = base64;
+      } else {
+        setImagePreview(base64);
+        setCurrentAch((prev) => ({ ...prev, image: base64 }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUrlChange = (url) => {
+    setCurrentAch((prev) => ({ ...prev, image: url }));
+    setImagePreview(url || null);
+  };
+
+  const clearImage = () => {
+    setImagePreview(null);
+    setCurrentAch((prev) => ({ ...prev, image: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSave = async (e) => {
@@ -67,6 +115,7 @@ export function AchievementManager() {
       year: currentAch.year.trim(),
       highlight: currentAch.highlight.trim() || 'Achievement',
       description: currentAch.description.trim(),
+      image: currentAch.image || '',
     };
 
     let updated;
@@ -87,11 +136,8 @@ export function AchievementManager() {
     if (!achievementToDelete) return;
     const targetId = achievementToDelete.id || achievementToDelete.title;
     setDeletingId(targetId);
-
     try {
-      if (achievementToDelete.id) {
-        await deleteContentItemFromDatabase('achievements', achievementToDelete.id);
-      }
+      if (achievementToDelete.id) await deleteContentItemFromDatabase('achievements', achievementToDelete.id);
       const updated = achievementList.filter((_, i) => i !== achievementToDelete._index);
       setAchievementList(updated);
       await persistContentToDatabase('achievements', updated);
@@ -114,7 +160,6 @@ export function AchievementManager() {
             Showcase your hackathon wins, national recognitions, and competitive milestones via MongoDB Database.
           </p>
         </div>
-
         <button
           type="button"
           onClick={handleOpenNew}
@@ -141,6 +186,7 @@ export function AchievementManager() {
             <table className="w-full text-left text-xs border-collapse font-mono">
               <thead>
                 <tr className="border-b border-white/10 text-white/40 uppercase tracking-wider">
+                  <th className="py-3.5 px-4 font-normal">Photo</th>
                   <th className="py-3.5 px-4 font-normal">Badge</th>
                   <th className="py-3.5 px-4 font-normal">Title &amp; Award</th>
                   <th className="py-3.5 px-4 font-normal">Event / Hackathon</th>
@@ -154,43 +200,32 @@ export function AchievementManager() {
                 {achievementList.map((ach, idx) => (
                   <tr key={ach.id || idx} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-4 px-4">
+                      {ach.image ? (
+                        <img src={ach.image} alt={ach.title} className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-white/[0.03] border border-white/10 flex items-center justify-center text-white/20">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-4 px-4">
                       <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                         {ach.number}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-white font-bold tracking-tight uppercase font-kanit text-sm">
-                      {ach.title}
-                    </td>
-                    <td className="py-4 px-4 text-white/70">
-                      {ach.event}
-                    </td>
+                    <td className="py-4 px-4 text-white font-bold tracking-tight uppercase font-kanit text-sm">{ach.title}</td>
+                    <td className="py-4 px-4 text-white/70">{ach.event}</td>
                     <td className="py-4 px-4 text-emerald-400">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]">
-                        {ach.project}
-                      </span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]">{ach.project}</span>
                     </td>
-                    <td className="py-4 px-4 text-white/50">
-                      {ach.year}
-                    </td>
-                    <td className="py-4 px-4 text-white/60">
-                      {ach.highlight}
-                    </td>
+                    <td className="py-4 px-4 text-white/50">{ach.year}</td>
+                    <td className="py-4 px-4 text-white/60">{ach.highlight}</td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(ach, idx)}
-                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
-                          title="Edit Achievement"
-                        >
+                        <button type="button" onClick={() => handleOpenEdit(ach, idx)} className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer" title="Edit Achievement">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setAchievementToDelete({ ...ach, _index: idx })}
-                          className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                          title="Delete Achievement"
-                        >
+                        <button type="button" onClick={() => setAchievementToDelete({ ...ach, _index: idx })} className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Delete Achievement">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -215,38 +250,27 @@ export function AchievementManager() {
               <h3 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-white font-kanit">
                 {currentAch._index >= 0 ? 'Edit Achievement' : 'Add New Achievement'}
               </h3>
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-              >
+              <button type="button" onClick={() => setIsEditing(false)} className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSave} className="space-y-4">
+              {/* Title + Badge */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Achievement / Award Title *
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Achievement / Award Title *</label>
                   <input
-                    type="text"
-                    required
-                    placeholder="e.g. 1ST PLACE WINNER"
+                    type="text" required placeholder="e.g. 1ST PLACE WINNER"
                     value={currentAch.title}
                     onChange={(e) => setCurrentAch({ ...currentAch, title: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
                   />
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Badge Number / Short (#)
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Badge Number / Short (#)</label>
                   <input
-                    type="text"
-                    placeholder="e.g. 01 or WIN"
+                    type="text" placeholder="e.g. 01 or WIN"
                     value={currentAch.number}
                     onChange={(e) => setCurrentAch({ ...currentAch, number: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -254,29 +278,21 @@ export function AchievementManager() {
                 </div>
               </div>
 
+              {/* Event + Project */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Event / Hackathon Name *
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Event / Hackathon Name *</label>
                   <input
-                    type="text"
-                    required
-                    placeholder="e.g. SMART INDIA HACKATHON"
+                    type="text" required placeholder="e.g. SMART INDIA HACKATHON"
                     value={currentAch.event}
                     onChange={(e) => setCurrentAch({ ...currentAch, event: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
                   />
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Project Associated *
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Project Associated *</label>
                   <input
-                    type="text"
-                    required
-                    placeholder="e.g. CLEARITYNOTE AI"
+                    type="text" required placeholder="e.g. CLEARITYNOTE AI"
                     value={currentAch.project}
                     onChange={(e) => setCurrentAch({ ...currentAch, project: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -284,28 +300,21 @@ export function AchievementManager() {
                 </div>
               </div>
 
+              {/* Year + Highlight */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Year *
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Year *</label>
                   <input
-                    type="text"
-                    required
-                    placeholder="e.g. 2025"
+                    type="text" required placeholder="e.g. 2025"
                     value={currentAch.year}
                     onChange={(e) => setCurrentAch({ ...currentAch, year: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
                   />
                 </div>
-
                 <div>
-                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                    Highlight Badge / Tag
-                  </label>
+                  <label className="text-xs font-mono uppercase text-white/60 block mb-1">Highlight Badge / Tag</label>
                   <input
-                    type="text"
-                    placeholder="e.g. Top 3 Podium Finish"
+                    type="text" placeholder="e.g. Top 3 Podium Finish"
                     value={currentAch.highlight}
                     onChange={(e) => setCurrentAch({ ...currentAch, highlight: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
@@ -313,13 +322,11 @@ export function AchievementManager() {
                 </div>
               </div>
 
+              {/* Description */}
               <div>
-                <label className="text-xs font-mono uppercase text-white/60 block mb-1">
-                  Description of Recognition &amp; Technical Scope *
-                </label>
+                <label className="text-xs font-mono uppercase text-white/60 block mb-1">Description of Recognition &amp; Technical Scope *</label>
                 <textarea
-                  rows="4"
-                  required
+                  rows="4" required
                   placeholder="Describe your achievement, the competition level, solutions developed, jury evaluation, etc."
                   value={currentAch.description}
                   onChange={(e) => setCurrentAch({ ...currentAch, description: e.target.value })}
@@ -327,28 +334,85 @@ export function AchievementManager() {
                 />
               </div>
 
+              {/* ── IMAGE / PHOTO UPLOAD ── */}
+              <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-4 space-y-3">
+                {/* Header + Toggle */}
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono uppercase text-white/60 flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
+                    Achievement Photo / Certificate Image
+                    <span className="text-white/30 normal-case">(optional)</span>
+                  </label>
+                  <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-0.5 border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase transition-all cursor-pointer flex items-center gap-1 ${imageMode === 'upload' ? 'bg-purple-600 text-white' : 'text-white/40 hover:text-white'}`}
+                    >
+                      <Upload className="w-3 h-3" />Upload
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase transition-all cursor-pointer flex items-center gap-1 ${imageMode === 'url' ? 'bg-purple-600 text-white' : 'text-white/40 hover:text-white'}`}
+                    >
+                      <Link className="w-3 h-3" />URL
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {imagePreview && (
+                  <div className="relative w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+                    <img src={imagePreview} alt="Preview" className="w-full max-h-44 object-cover" onError={() => setImagePreview(null)} />
+                    <button
+                      type="button" onClick={clearImage}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white/80 hover:text-white hover:bg-rose-600/80 transition-colors cursor-pointer"
+                      title="Remove image"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                      <p className="text-[10px] font-mono text-white/60">Preview — stored in MongoDB</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload mode */}
+                {imageMode === 'upload' && (
+                  <>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="ach-image-upload" />
+                    <label
+                      htmlFor="ach-image-upload"
+                      className="flex flex-col items-center justify-center gap-2 w-full py-5 rounded-xl border border-dashed border-white/20 text-white/40 hover:text-white hover:border-white/40 transition-colors cursor-pointer bg-white/[0.01] hover:bg-white/[0.03]"
+                    >
+                      <Upload className="w-5 h-5" />
+                      <span className="text-[11px] font-mono uppercase tracking-wider">Click to upload achievement photo</span>
+                      <span className="text-[10px] font-mono text-white/30">JPG, PNG, WEBP — auto-compressed</span>
+                    </label>
+                  </>
+                )}
+
+                {/* URL mode */}
+                {imageMode === 'url' && (
+                  <>
+                    <input
+                      type="url"
+                      placeholder="https://example.com/achievement-photo.jpg"
+                      value={currentAch.image?.startsWith('data:') ? '' : currentAch.image || ''}
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
+                    />
+                    <p className="text-[10px] font-mono text-white/30">Paste a direct public image URL.</p>
+                  </>
+                )}
+              </div>
+              {/* ── END IMAGE ── */}
+
               <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  disabled={isSaving}
-                  onClick={() => setIsEditing(false)}
-                  className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer flex items-center gap-2"
-                >
-                  {isSaving ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving to Database...</span>
-                    </>
-                  ) : (
-                    <span>Save Achievement</span>
-                  )}
+                <button type="button" disabled={isSaving} onClick={() => setIsEditing(false)} className="px-5 py-2 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 transition-colors cursor-pointer">Cancel</button>
+                <button type="submit" disabled={isSaving} className="px-6 py-2 rounded-full bg-white text-black text-xs font-bold uppercase hover:bg-neutral-200 transition-colors cursor-pointer flex items-center gap-2">
+                  {isSaving ? (<><RefreshCw className="w-3.5 h-3.5 animate-spin" /><span>Saving to Database...</span></>) : (<span>Save Achievement</span>)}
                 </button>
               </div>
             </form>
@@ -356,7 +420,7 @@ export function AchievementManager() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal (Trace Option) */}
+      {/* Delete Confirmation Modal */}
       {achievementToDelete && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden">
           <div data-lenis-prevent="true" className="w-full max-w-md rounded-3xl bg-[#0E0E0E] border border-rose-500/30 p-6 sm:p-7 shadow-2xl space-y-5">
@@ -365,45 +429,17 @@ export function AchievementManager() {
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold uppercase tracking-tight text-white font-kanit">
-                  Delete Achievement?
-                </h3>
-                <p className="text-xs text-white/50 font-mono">
-                  Permanent database removal
-                </p>
+                <h3 className="text-base font-bold uppercase tracking-tight text-white font-kanit">Delete Achievement?</h3>
+                <p className="text-xs text-white/50 font-mono">Permanent database removal</p>
               </div>
             </div>
-
             <p className="text-xs text-white/70 leading-relaxed font-light">
               Are you sure you want to delete <span className="text-white font-bold font-mono">"{achievementToDelete.title} - {achievementToDelete.event}"</span>? This will permanently remove it from both your live portfolio website and the MongoDB database.
             </p>
-
             <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                disabled={Boolean(deletingId)}
-                onClick={() => setAchievementToDelete(null)}
-                className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={Boolean(deletingId)}
-                onClick={confirmDelete}
-                className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
-              >
-                {deletingId ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Deleting from Database...</span>
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Yes, Delete Achievement</span>
-                  </>
-                )}
+              <button type="button" disabled={Boolean(deletingId)} onClick={() => setAchievementToDelete(null)} className="px-5 py-2.5 rounded-full border border-white/20 text-xs font-mono uppercase hover:bg-white/10 text-white/80 transition-colors cursor-pointer">Cancel</button>
+              <button type="button" disabled={Boolean(deletingId)} onClick={confirmDelete} className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2">
+                {deletingId ? (<><RefreshCw className="w-3.5 h-3.5 animate-spin" /><span>Deleting from Database...</span></>) : (<><Trash2 className="w-3.5 h-3.5" /><span>Yes, Delete Achievement</span></>)}
               </button>
             </div>
           </div>

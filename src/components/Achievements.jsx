@@ -74,9 +74,20 @@ export function Achievements() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.25, 0.1, 0.25, 1] }}
-              className="group relative rounded-[32px] sm:rounded-[44px] bg-white/[0.02] border border-white/[0.1] p-6 sm:p-8 lg:p-10 flex flex-col justify-between transition-all duration-300 hover:border-white/25 hover:bg-white/[0.04]"
+              className="group relative rounded-[32px] sm:rounded-[44px] bg-white/[0.02] border border-white/[0.1] flex flex-col justify-between transition-all duration-300 hover:border-white/25 hover:bg-white/[0.04] overflow-hidden"
             >
-              <div>
+              {/* Achievement Image Banner */}
+              {item.image ? (
+                <div className="relative w-full h-48 sm:h-56 overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={`${item.title} — ${item.event}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-[#0C0C0C]"/>
+                </div>
+              ) : null}
+              <div className="p-6 sm:p-8 lg:p-10">
                 {/* Header Tag + Year */}
                 <div className="flex items-center justify-between gap-4 mb-8">
                   <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider bg-white/[0.04] border border-white/10 text-[#BBCCD7]">
@@ -120,7 +131,7 @@ export function Achievements() {
               </div>
 
               {/* Bottom Subtle Accent Line */}
-              <div className="mt-8 pt-4 border-t border-white/[0.06] flex justify-between items-center text-xs font-mono text-[#D7E2EA]/40">
+              <div className="mx-6 sm:mx-8 lg:mx-10 mb-6 sm:mb-8 lg:mb-10 mt-2 pt-4 border-t border-white/[0.06] flex justify-between items-center text-xs font-mono text-[#D7E2EA]/40">
                 <span>VERIFIED COMPETITIVE MILESTONE</span>
                 <span className="text-[#BBCCD7]/60 group-hover:text-white transition-colors">↗</span>
               </div>
