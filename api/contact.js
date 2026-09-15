@@ -19,7 +19,14 @@ export default async function handler(req, res) {
           .limit(100)
           .toArray();
         await client.close();
-        return res.status(200).json({ success: true, messages });
+
+        const formatted = messages.map((m) => ({
+          ...m,
+          _id: m._id ? m._id.toString() : `msg_${Date.now()}`,
+          createdAt: m.createdAt ? new Date(m.createdAt).toISOString() : new Date().toISOString(),
+        }));
+
+        return res.status(200).json({ success: true, messages: formatted });
       } catch (err) {
         console.error('MongoDB fetch error:', err.message);
         return res.status(200).json({ success: false, messages: [], error: err.message });
