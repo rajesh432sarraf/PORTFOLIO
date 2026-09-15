@@ -62,16 +62,27 @@ export function Projects() {
         </div>
 
         {/* Featured Sticky Cards Showcase */}
-        <div className="relative w-full pb-12 sm:pb-20">
-          {projectList.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              index={index}
-              totalCards={projectList.length}
-            />
-          ))}
-        </div>
+        {projectList && projectList.length > 0 ? (
+          <div className="relative w-full pb-12 sm:pb-20">
+            {projectList.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                index={index}
+                totalCards={projectList.length}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center border border-white/10 rounded-3xl bg-white/[0.02] p-8 max-w-xl mx-auto">
+            <span className="text-xs font-mono uppercase tracking-widest text-white/40 block mb-2">
+              [ COMING SOON ]
+            </span>
+            <p className="text-sm text-white/70 font-light">
+              Selected projects are currently being updated. New works will be published soon.
+            </p>
+          </div>
+        )}
 
         {/* Archive Section: Additional Projects */}
         {archiveProjects && archiveProjects.length > 0 && (

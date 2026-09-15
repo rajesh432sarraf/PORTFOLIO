@@ -3,6 +3,8 @@ import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X,
 import { projects as initialProjects } from '../data/projects.js';
 import { compressImage, persistProjects, fetchProjectsFromDatabase } from '../services/storageService.js';
 
+const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23141414'/%3E%3Ccircle cx='400' cy='230' r='36' fill='%23222'/%3E%3Ctext x='50%25' y='300' text-anchor='middle' fill='%23666' font-family='monospace' font-size='13' letter-spacing='2'%3EPROJECT SHOWCASE%3C/text%3E%3C/svg%3E";
+
 export function ProjectManager() {
   const [projectList, setProjectList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,7 +157,8 @@ export function ProjectManager() {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
-    const mainImg = currentProject.image || currentProject.gallery?.[0] || '/images/projects/cutzen-main.jpg';
+    const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23141414'/%3E%3Ccircle cx='400' cy='230' r='36' fill='%23222'/%3E%3Ctext x='50%25' y='300' text-anchor='middle' fill='%23666' font-family='monospace' font-size='13' letter-spacing='2'%3EPROJECT SHOWCASE%3C/text%3E%3C/svg%3E";
+    const mainImg = currentProject.image || currentProject.gallery?.[0] || PLACEHOLDER_IMG;
     const galleryImgs = [
       currentProject.gallery?.[0] || mainImg,
       currentProject.gallery?.[1] || mainImg,
@@ -253,7 +256,7 @@ export function ProjectManager() {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '/images/projects/cutzen-main.jpg';
+                            e.target.src = PLACEHOLDER_IMG;
                           }}
                         />
                       ) : (
@@ -462,7 +465,7 @@ export function ProjectManager() {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = '/images/projects/cutzen-main.jpg';
+                          e.target.src = PLACEHOLDER_IMG;
                         }}
                       />
                     ) : (
@@ -525,7 +528,7 @@ export function ProjectManager() {
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = '/images/projects/cutzen-main.jpg';
+                              e.target.src = PLACEHOLDER_IMG;
                             }}
                           />
                         ) : (

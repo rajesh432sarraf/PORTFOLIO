@@ -54,8 +54,9 @@ export function ProjectCard({ project, index, totalCards }) {
 
       {/* ASYMMETRIC 3-IMAGE EDITORIAL GALLERY */}
       {(() => {
+        const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Crect width='800' height='500' fill='%23141414'/%3E%3Ccircle cx='400' cy='230' r='36' fill='%23222'/%3E%3Ctext x='50%25' y='300' text-anchor='middle' fill='%23666' font-family='monospace' font-size='13' letter-spacing='2'%3EPROJECT SHOWCASE%3C/text%3E%3C/svg%3E";
         const galleryList = Array.isArray(project.gallery) ? project.gallery : [];
-        const mainCover = project.image || galleryList[0] || '/images/projects/cutzen-main.jpg';
+        const mainCover = project.image || galleryList[0] || PLACEHOLDER_IMG;
         const img1 = galleryList[0] || mainCover;
         const img2 = galleryList[1] || mainCover;
 
@@ -74,7 +75,7 @@ export function ProjectCard({ project, index, totalCards }) {
                   loading="lazy"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/images/projects/cutzen-main.jpg';
+                    e.target.src = PLACEHOLDER_IMG;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
@@ -91,7 +92,7 @@ export function ProjectCard({ project, index, totalCards }) {
                   loading="lazy"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/images/projects/cutzen-main.jpg';
+                    e.target.src = PLACEHOLDER_IMG;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
@@ -111,7 +112,7 @@ export function ProjectCard({ project, index, totalCards }) {
                   loading="lazy"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/images/projects/cutzen-main.jpg';
+                    e.target.src = PLACEHOLDER_IMG;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
