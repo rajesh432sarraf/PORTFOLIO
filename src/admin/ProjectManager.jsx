@@ -1,44 +1,90 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash, RefreshCw } from 'lucide-react';
 import { projects as initialProjects } from '../data/projects.js';
+import { compressImage, persistProjects, getStoredProjects, getFromIndexedDB, mergeProjectLists } from '../services/storageService.js';
 
 export function ProjectManager() {
-  const [projectList, setProjectList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('rajesh_portfolio_projects');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      return initialProjects;
-    } catch (e) {
-      return initialProjects;
-    }
-  });
-
+  const [projectList, setProjectList] = useState(() => getStoredProjects(initialProjects));
   const [isEditing, setIsEditing] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
   const [techInput, setTechInput] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [saveNotification, setSaveNotification] = useState('');
 
-  const saveToStorage = (updated) => {
-    setProjectList(updated);
-    try {
-      localStorage.setItem('rajesh_portfolio_projects', JSON.stringify(updated));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
-    } catch (e) {
-      console.error('Failed to save projects to localStorage', e);
+  // Load from IndexedDB and Cloud MongoDB on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAllSources() {
+      let active = getStoredProjects(initialProjects);
+
+      // 1. Try IndexedDB (our unlimited client database)
+      try {
+        const idbProjects = await getFromIndexedDB('rajesh_portfolio_projects');
+        if (isMounted && idbProjects && Array.isArray(idbProjects) && idbProjects.length > 0) {
+          active = idbProjects;
+          setProjectList(idbProjects);
+        }
+      } catch (e) {}
+
+      // 2. Try fetching from Cloud MongoDB (/api/content?type=projects)
+      try {
+        const res = await fetch('/api/content?type=projects');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
+            // MERGE: Keep any locally added projects so they are NEVER wiped out!
+            const merged = mergeProjectLists(active, data.projects);
+            setProjectList(merged);
+            persistProjects(merged);
+          } else if (active.length > 0) {
+            // Push active projects to cloud if cloud was uninitialized
+            fetch('/api/content?type=projects', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'projects', data: active }),
+            }).catch(() => {});
+          }
+        }
+      } catch (e) {}
     }
+
+    loadAllSources();
+
+    const handleUpdate = async () => {
+      const idb = await getFromIndexedDB('rajesh_portfolio_projects');
+      if (idb && Array.isArray(idb) && idb.length > 0) {
+        setProjectList(idb);
+      } else {
+        setProjectList(getStoredProjects(initialProjects));
+      }
+    };
+
+    window.addEventListener('portfolio_data_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('portfolio_data_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  const saveToStorage = async (updated) => {
+    setProjectList(updated);
+    await persistProjects(updated);
+    setSaveNotification('Projects saved permanently to storage & cloud!');
+    setTimeout(() => setSaveNotification(''), 4000);
   };
 
-  const handleToggleFeatured = (id) => {
+  const handleToggleFeatured = async (id) => {
     const updated = projectList.map((p) => (p.id === id ? { ...p, featured: !p.featured } : p));
-    saveToStorage(updated);
+    await saveToStorage(updated);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       const updated = projectList.filter((p) => p.id !== id);
-      saveToStorage(updated);
+      await saveToStorage(updated);
     }
   };
 
@@ -57,7 +103,7 @@ export function ProjectManager() {
       id: `proj_${Date.now()}`,
       number: num,
       title: '',
-      category: 'WEB APPLICATION / AI PRODUCT',
+      category: 'WEB APPLICATION / DOCUMENT MANAGEMENT',
       year: new Date().getFullYear().toString(),
       description: '',
       technologies: ['React', 'JavaScript', 'Tailwind CSS'],
@@ -71,43 +117,42 @@ export function ProjectManager() {
     setIsEditing(true);
   };
 
-  const handleImageFileUpload = (e, galleryIndex = null) => {
+  const handleImageFileUpload = async (e, galleryIndex = null) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image file size should be less than 10MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result;
-      if (!dataUrl) return;
+    setIsCompressing(true);
+    try {
+      // Auto-compress the image to max 1200px / 75% quality JPEG (~70KB)
+      // This eliminates QuotaExceededError and prevents projects from disappearing on refresh!
+      const compressedDataUrl = await compressImage(file, 1200, 0.75);
 
       if (galleryIndex === null) {
         setCurrentProject((prev) => {
           const galleryCopy = [...(prev.gallery || ['', '', ''])];
-          if (!galleryCopy[0]) galleryCopy[0] = dataUrl;
-          if (!galleryCopy[1]) galleryCopy[1] = dataUrl;
+          if (!galleryCopy[0]) galleryCopy[0] = compressedDataUrl;
+          if (!galleryCopy[1]) galleryCopy[1] = compressedDataUrl;
           return {
             ...prev,
-            image: dataUrl,
+            image: compressedDataUrl,
             gallery: galleryCopy,
           };
         });
       } else {
         setCurrentProject((prev) => {
           const galleryCopy = [...(prev.gallery || ['', '', ''])];
-          galleryCopy[galleryIndex] = dataUrl;
+          galleryCopy[galleryIndex] = compressedDataUrl;
           return { ...prev, gallery: galleryCopy };
         });
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Image compression error:', err);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
 
     const techArray = techInput
@@ -142,17 +187,25 @@ export function ProjectManager() {
       updated = [projectToSave, ...projectList];
     }
 
-    saveToStorage(updated);
+    await saveToStorage(updated);
     setIsEditing(false);
   };
 
   return (
     <div className="space-y-6">
+      {/* Save Notification Toast */}
+      {saveNotification && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span>{saveNotification}</span>
+        </div>
+      )}
+
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
-            Projects Management & Showcase
+            Projects Management &amp; Showcase
           </h2>
           <p className="text-xs font-mono text-white/50">
             Add new projects, upload screenshots, feature items, and edit details in real-time.
@@ -187,12 +240,20 @@ export function ProjectManager() {
               {projectList.map((p) => (
                 <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-4 font-mono text-white/40 font-bold">{p.number}</td>
-                  
+
                   {/* Thumbnail Preview */}
                   <td className="py-4 px-4">
                     <div className="w-14 h-10 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 relative">
                       {p.image ? (
-                        <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                        <img
+                          src={p.image}
+                          alt={p.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/images/projects/cutzen-main.jpg';
+                          }}
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white/30">
                           <ImageIcon className="w-4 h-4" />
@@ -300,7 +361,7 @@ export function ProjectManager() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. WEB APPLICATION / AI PRODUCT"
+                    placeholder="e.g. WEB APPLICATION / DOCUMENT MANAGEMENT"
                     value={currentProject.category}
                     onChange={(e) => setCurrentProject({ ...currentProject, category: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white text-xs focus:outline-none focus:border-purple-400 font-medium"
@@ -376,9 +437,14 @@ export function ProjectManager() {
                     <ImageIcon className="w-4 h-4 text-purple-400" />
                     <span>Main Featured Cover Photo (Primary Showcase Image)</span>
                   </label>
-                  {currentProject.image && (
+                  {isCompressing && (
+                    <span className="text-[10px] font-mono text-amber-400 flex items-center gap-1 animate-pulse">
+                      <RefreshCw className="w-3 h-3 animate-spin" /> Auto-optimizing photo...
+                    </span>
+                  )}
+                  {!isCompressing && currentProject.image && (
                     <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Image Uploaded
+                      <Check className="w-3 h-3" /> Ready &amp; Optimized
                     </span>
                   )}
                 </div>
@@ -391,6 +457,10 @@ export function ProjectManager() {
                         src={currentProject.image}
                         alt="Main cover preview"
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/images/projects/cutzen-main.jpg';
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-white/30 text-[10px] font-mono p-2 text-center">
@@ -416,7 +486,7 @@ export function ProjectManager() {
                     </div>
 
                     <p className="text-[10px] font-mono text-white/40">
-                      Upload any screenshot/photo from your PC (.png, .jpg, .webp). Or paste image URL below:
+                      Upload any screenshot/photo from your PC (.png, .jpg, .webp). Auto-compressed for instant permanent storage:
                     </p>
 
                     <input
@@ -450,6 +520,10 @@ export function ProjectManager() {
                             src={currentProject.gallery[idx]}
                             alt={`Gallery screenshot ${idx + 1}`}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/images/projects/cutzen-main.jpg';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-white/20 text-[10px] font-mono">
@@ -529,9 +603,10 @@ export function ProjectManager() {
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
+                  disabled={isCompressing}
+                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer disabled:opacity-50"
                 >
-                  Save Project &amp; Photos
+                  {isCompressing ? 'Compressing Photos...' : 'Save Project & Photos'}
                 </button>
               </div>
             </form>
