@@ -194,7 +194,7 @@ export function ProjectManager() {
     if (exists) {
       updated = projectList.map((p) => (p.id === projectToSave.id ? projectToSave : p));
     } else {
-      updated = [projectToSave, ...projectList];
+      updated = [...projectList, projectToSave];
     }
 
     // Await database write to guarantee data persistence before closing modal
