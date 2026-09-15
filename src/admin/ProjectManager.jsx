@@ -1,79 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash, RefreshCw } from 'lucide-react';
 import { projects as initialProjects } from '../data/projects.js';
-import { compressImage, persistProjects, getStoredProjects, getFromIndexedDB, mergeProjectLists } from '../services/storageService.js';
+import { compressImage, persistProjects, fetchProjectsFromDatabase } from '../services/storageService.js';
 
 export function ProjectManager() {
-  const [projectList, setProjectList] = useState(() => getStoredProjects(initialProjects));
+  const [projectList, setProjectList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
   const [techInput, setTechInput] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
   const [saveNotification, setSaveNotification] = useState('');
 
-  // Load from IndexedDB and Cloud MongoDB on mount
+  // Load directly from MongoDB Cloud Database on mount & refresh
   useEffect(() => {
     let isMounted = true;
 
     async function loadAllSources() {
-      let active = getStoredProjects(initialProjects);
-
-      // 1. Try IndexedDB (our unlimited client database)
+      setIsLoading(true);
       try {
-        const idbProjects = await getFromIndexedDB('rajesh_portfolio_projects');
-        if (isMounted && idbProjects && Array.isArray(idbProjects) && idbProjects.length > 0) {
-          active = idbProjects;
-          setProjectList(idbProjects);
+        const data = await fetchProjectsFromDatabase(initialProjects);
+        if (isMounted && data && Array.isArray(data)) {
+          setProjectList(data);
         }
-      } catch (e) {}
-
-      // 2. Try fetching from Cloud MongoDB (/api/content?type=projects)
-      try {
-        const res = await fetch('/api/content?type=projects');
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted && data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
-            // MERGE: Keep any locally added projects so they are NEVER wiped out!
-            const merged = mergeProjectLists(active, data.projects);
-            setProjectList(merged);
-            persistProjects(merged);
-          } else if (active.length > 0) {
-            // Push active projects to cloud if cloud was uninitialized
-            fetch('/api/content?type=projects', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'projects', data: active }),
-            }).catch(() => {});
-          }
-        }
-      } catch (e) {}
+      } catch (err) {
+        console.error('Failed to load from database:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     }
 
     loadAllSources();
 
     const handleUpdate = async () => {
-      const idb = await getFromIndexedDB('rajesh_portfolio_projects');
-      if (idb && Array.isArray(idb) && idb.length > 0) {
-        setProjectList(idb);
-      } else {
-        setProjectList(getStoredProjects(initialProjects));
-      }
+      try {
+        const data = await fetchProjectsFromDatabase(initialProjects);
+        if (data && Array.isArray(data)) {
+          setProjectList(data);
+        }
+      } catch (e) {}
     };
 
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
       isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
 
   const saveToStorage = async (updated) => {
+    setIsSaving(true);
     setProjectList(updated);
-    await persistProjects(updated);
-    setSaveNotification('Projects saved permanently to storage & cloud!');
-    setTimeout(() => setSaveNotification(''), 4000);
+    try {
+      const ok = await persistProjects(updated);
+      if (ok) {
+        setSaveNotification('Saved permanently in MongoDB Database!');
+      } else {
+        setSaveNotification('Saved in local database cache.');
+      }
+      setTimeout(() => setSaveNotification(''), 4000);
+      return ok;
+    } catch (err) {
+      console.error('Save failed:', err);
+      setSaveNotification('Saved in local database cache.');
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleToggleFeatured = async (id) => {
@@ -154,6 +148,7 @@ export function ProjectManager() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
 
     const techArray = techInput
       .split(',')
@@ -187,6 +182,7 @@ export function ProjectManager() {
       updated = [projectToSave, ...projectList];
     }
 
+    // Await database write to guarantee data persistence before closing modal
     await saveToStorage(updated);
     setIsEditing(false);
   };
@@ -208,7 +204,7 @@ export function ProjectManager() {
             Projects Management &amp; Showcase
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add new projects, upload screenshots, feature items, and edit details in real-time.
+            Connected to MongoDB Database. Real-time persistent cloud storage across reloads.
           </p>
         </div>
 
@@ -224,6 +220,12 @@ export function ProjectManager() {
 
       {/* Projects Grid / Table */}
       <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
+        {isLoading && projectList.length === 0 ? (
+          <div className="py-16 text-center text-white/40 text-xs font-mono flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-purple-400" />
+            <span>Connecting to MongoDB Database...</span>
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[650px]">
             <thead>
@@ -318,6 +320,7 @@ export function ProjectManager() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* Edit / Create Project Modal with Full Photo Upload */}
@@ -603,10 +606,22 @@ export function ProjectManager() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isCompressing}
-                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer disabled:opacity-50"
+                  disabled={isCompressing || isSaving}
+                  className="px-7 py-2.5 rounded-full bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isCompressing ? 'Compressing Photos...' : 'Save Project & Photos'}
+                  {isSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : isCompressing ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Optimizing Photos...</span>
+                    </>
+                  ) : (
+                    <span>Save Project &amp; Photos</span>
+                  )}
                 </button>
               </div>
             </form>

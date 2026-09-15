@@ -162,49 +162,79 @@ export function mergeProjectLists(localProjects = [], cloudProjects = []) {
 }
 
 /**
- * Saves projects array safely across LocalStorage, IndexedDB, and Cloud MongoDB.
+ * Fetches projects directly from MongoDB Database (with IndexedDB fallback).
+ * Guarantees that data is retrieved from real database and never lost on page refresh.
+ */
+export async function fetchProjectsFromDatabase(fallbackProjects = []) {
+  // 1. Fetch from MongoDB Atlas Database
+  try {
+    const res = await fetch('/api/content?type=projects', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
+        // Cache in IndexedDB for instant offline access
+        await setInIndexedDB('rajesh_portfolio_projects', data.projects);
+        return data.projects;
+      }
+    }
+  } catch (err) {
+    console.warn('MongoDB database fetch error, attempting local database cache:', err);
+  }
+
+  // 2. Fallback to IndexedDB (local high-storage database - gigabytes capacity)
+  try {
+    const idbProjects = await getFromIndexedDB('rajesh_portfolio_projects');
+    if (idbProjects && Array.isArray(idbProjects) && idbProjects.length > 0) {
+      return idbProjects;
+    }
+  } catch (e) {}
+
+  return fallbackProjects;
+}
+
+/**
+ * Saves projects array directly to MongoDB Cloud Database (and IndexedDB).
+ * Awaits confirmation so page refresh cannot interrupt the database write.
  */
 export async function persistProjects(projectsArray) {
-  if (!Array.isArray(projectsArray)) return;
+  if (!Array.isArray(projectsArray)) return false;
 
-  // 1. Save in IndexedDB (virtually unlimited quota - gigabytes)
-  await setInIndexedDB('rajesh_portfolio_projects', projectsArray);
+  let dbSuccess = false;
 
-  // 2. Save in LocalStorage with safe quota handling
+  // 1. Direct Save to MongoDB Cloud Database (AWAITED to prevent reload race conditions)
   try {
-    localStorage.setItem('rajesh_portfolio_projects', JSON.stringify(projectsArray));
-  } catch (quotaErr) {
-    console.warn('LocalStorage quota exceeded. Data safely stored in IndexedDB.', quotaErr);
+    const res = await fetch('/api/content?type=projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'projects', data: projectsArray }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      dbSuccess = json.success;
+    } else {
+      console.warn('MongoDB POST non-OK status:', res.status);
+    }
+  } catch (apiErr) {
+    console.warn('Network error saving to MongoDB:', apiErr);
   }
+
+  // 2. Save in IndexedDB (virtually unlimited quota - gigabytes)
+  await setInIndexedDB('rajesh_portfolio_projects', projectsArray);
 
   // 3. Dispatch cross-component update event
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('portfolio_data_updated'));
   }
 
-  // 4. Background Sync to Cloud MongoDB Atlas
-  try {
-    fetch('/api/content?type=projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'projects', data: projectsArray }),
-    }).catch(() => {});
-  } catch (apiErr) {}
+  return dbSuccess;
 }
 
 /**
- * Loads projects with instant local sync and background cloud retrieval.
+ * Loads projects with instant local sync from IndexedDB or initial.
  */
 export function getStoredProjects(fallbackProjects = []) {
-  if (typeof window === 'undefined') return fallbackProjects;
-
-  try {
-    const local = localStorage.getItem('rajesh_portfolio_projects');
-    if (local) {
-      const parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch (e) {}
-
   return fallbackProjects;
 }

@@ -3,34 +3,19 @@ import { ArrowUpRight } from 'lucide-react';
 import ProjectCard from './ProjectCard.jsx';
 import FadeIn from './FadeIn.jsx';
 import { projects as initialProjects, archiveProjects } from '../data/projects.js';
-import { getStoredProjects, getFromIndexedDB, persistProjects, mergeProjectLists } from '../services/storageService.js';
+import { fetchProjectsFromDatabase } from '../services/storageService.js';
 
 export function Projects() {
-  const [projectList, setProjectList] = useState(() => getStoredProjects(initialProjects));
+  const [projectList, setProjectList] = useState(initialProjects);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadAll() {
-      let active = getStoredProjects(initialProjects);
-
       try {
-        const idb = await getFromIndexedDB('rajesh_portfolio_projects');
-        if (isMounted && idb && Array.isArray(idb) && idb.length > 0) {
-          active = idb;
-          setProjectList(idb);
-        }
-      } catch (e) {}
-
-      try {
-        const res = await fetch('/api/content?type=projects');
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted && data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
-            const merged = mergeProjectLists(active, data.projects);
-            setProjectList(merged);
-            persistProjects(merged);
-          }
+        const data = await fetchProjectsFromDatabase(initialProjects);
+        if (isMounted && data && Array.isArray(data) && data.length > 0) {
+          setProjectList(data);
         }
       } catch (e) {}
     }
@@ -38,20 +23,18 @@ export function Projects() {
     loadAll();
 
     const handleUpdate = async () => {
-      const idb = await getFromIndexedDB('rajesh_portfolio_projects');
-      if (idb && Array.isArray(idb) && idb.length > 0) {
-        setProjectList(idb);
-      } else {
-        setProjectList(getStoredProjects(initialProjects));
-      }
+      try {
+        const data = await fetchProjectsFromDatabase(initialProjects);
+        if (data && Array.isArray(data) && data.length > 0) {
+          setProjectList(data);
+        }
+      } catch (e) {}
     };
 
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
       isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
   return (

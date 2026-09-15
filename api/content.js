@@ -17,12 +17,12 @@ export default async function handler(req, res) {
         await client.connect();
         const db = client.db(process.env.MONGODB_DB_NAME || 'portfolio');
         const collection = db.collection(type);
-        const items = await collection.find({}).sort({ number: 1, order: 1 }).toArray();
+        const items = await collection.find({}).sort({ displayOrder: 1, number: 1 }).toArray();
         await client.close();
 
         if (items && items.length > 0) {
           const cleanItems = items.map((item) => {
-            const { _id, ...rest } = item;
+            const { _id, displayOrder, ...rest } = item;
             return { ...rest, id: rest.id || _id.toString() };
           });
           return res.status(200).json({ success: true, [type]: cleanItems });
@@ -59,8 +59,11 @@ export default async function handler(req, res) {
         const db = client.db(process.env.MONGODB_DB_NAME || 'portfolio');
         const collection = db.collection(type);
 
-        // Strip existing _id from objects to avoid duplicate key errors in MongoDB
-        const cleanData = data.map(({ _id, ...item }) => item);
+        // Strip existing _id and attach displayOrder to preserve user ordering exactly
+        const cleanData = data.map(({ _id, displayOrder, ...item }, idx) => ({
+          ...item,
+          displayOrder: idx,
+        }));
 
         // Replace collection with latest verified data array
         await collection.deleteMany({});
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
         }
         await client.close();
 
-        return res.status(200).json({ success: true, message: `${type} saved successfully to cloud.` });
+        return res.status(200).json({ success: true, message: `${type} saved successfully to cloud database.` });
       } catch (err) {
         console.error('MongoDB save error for content:', err.message);
         return res.status(500).json({ error: err.message });
