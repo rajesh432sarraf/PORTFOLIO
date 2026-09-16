@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Edit2, Trash2, Trophy, Award, X, RefreshCw, Upload, Image as ImageIcon, Link } from 'lucide-react';
+import { Plus, Edit2, Trash2, Trophy, Award, X, RefreshCw, Upload, Image as ImageIcon, Link, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function AchievementManager() {
@@ -12,6 +12,8 @@ export function AchievementManager() {
   const [deletingId, setDeletingId] = useState(null);
   const [imageMode, setImageMode] = useState('upload');
   const [imagePreview, setImagePreview] = useState(null);
+  const [placement, setPlacement] = useState('default'); // 'default' (bottom) | 'top' | 'after'
+  const [insertAfterId, setInsertAfterId] = useState('');
   const fileInputRef = useRef(null);
 
   const loadAchievements = async () => {
@@ -59,7 +61,23 @@ export function AchievementManager() {
     });
     setImagePreview(null);
     setImageMode('upload');
+    setPlacement('default');
+    setInsertAfterId(achievementList.length > 0 ? (achievementList[achievementList.length - 1].id || achievementList[achievementList.length - 1].title) : '');
     setIsEditing(true);
+  };
+
+  const handleMove = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= achievementList.length) return;
+    const updated = [...achievementList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(target, 0, moved);
+    const renumbered = updated.map((ach, i) => ({
+      ...ach,
+      number: (i + 1).toString().padStart(2, '0'),
+    }));
+    setAchievementList(renumbered);
+    await persistContentToDatabase('achievements', renumbered);
   };
 
   /* ── Image helpers ── */
@@ -122,7 +140,24 @@ export function AchievementManager() {
     if (currentAch._index >= 0) {
       updated = achievementList.map((ach, i) => (i === currentAch._index ? achToSave : ach));
     } else {
-      updated = [...achievementList, achToSave];
+      if (placement === 'top') {
+        updated = [achToSave, ...achievementList];
+      } else if (placement === 'after' && insertAfterId) {
+        const idx = achievementList.findIndex((ach) => (ach.id || ach.title) === insertAfterId);
+        if (idx !== -1) {
+          updated = [...achievementList];
+          updated.splice(idx + 1, 0, achToSave);
+        } else {
+          updated = [...achievementList, achToSave];
+        }
+      } else {
+        // default: at the end
+        updated = [...achievementList, achToSave];
+      }
+      updated = updated.map((ach, i) => ({
+        ...ach,
+        number: (i + 1).toString().padStart(2, '0'),
+      }));
     }
 
     setIsSaving(true);
@@ -193,7 +228,7 @@ export function AchievementManager() {
                   <th className="py-3.5 px-4 font-normal">Project</th>
                   <th className="py-3.5 px-4 font-normal">Year</th>
                   <th className="py-3.5 px-4 font-normal">Highlight</th>
-                  <th className="py-3.5 px-4 font-normal text-right">Actions</th>
+                  <th className="py-3.5 px-4 font-normal text-right">Order &amp; Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -221,8 +256,28 @@ export function AchievementManager() {
                     <td className="py-4 px-4 text-white/50">{ach.year}</td>
                     <td className="py-4 px-4 text-white/60">{ach.highlight}</td>
                     <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button type="button" onClick={() => handleOpenEdit(ach, idx)} className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer" title="Edit Achievement">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Reorder Buttons */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMove(idx, -1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === achievementList.length - 1}
+                          onClick={() => handleMove(idx, 1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button type="button" onClick={() => handleOpenEdit(ach, idx)} className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer ml-1" title="Edit Achievement">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button type="button" onClick={() => setAchievementToDelete({ ...ach, _index: idx })} className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Delete Achievement">
@@ -321,6 +376,75 @@ export function AchievementManager() {
                   />
                 </div>
               </div>
+
+              {/* Placement / Custom Ordering Selector (Only when adding new achievement) */}
+              {currentAch._index < 0 && achievementList.length > 0 && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 font-mono">
+                  <label className="text-xs uppercase text-white/70 block font-semibold flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Achievement Placement / Position</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('default')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'default'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the End (Default)</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Appends to last</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('top')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'top'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the Top</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Position #01</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('after')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'after'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">Custom: Insert After...</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Pick specific item</span>
+                    </button>
+                  </div>
+
+                  {placement === 'after' && (
+                    <div className="pt-2 border-t border-white/10">
+                      <label className="text-[11px] uppercase text-white/60 block mb-1">
+                        Insert directly after this achievement:
+                      </label>
+                      <select
+                        value={insertAfterId}
+                        onChange={(e) => setInsertAfterId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/20 text-white text-xs font-mono focus:outline-none focus:border-purple-400 cursor-pointer"
+                      >
+                        {achievementList.map((ach, idx) => (
+                          <option key={ach.id || idx} value={ach.id || ach.title} className="bg-neutral-900 text-white">
+                            #{ach.number || idx + 1} — {ach.title} ({ach.event})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Description */}
               <div>

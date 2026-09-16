@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Edit2, Trash2, Award, CheckCircle2, ExternalLink, X, RefreshCw, Upload, Image as ImageIcon, Link } from 'lucide-react';
+import { Plus, Edit2, Trash2, Award, CheckCircle2, ExternalLink, X, RefreshCw, Upload, Image as ImageIcon, Link, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function CertificateManager() {
@@ -12,6 +12,8 @@ export function CertificateManager() {
   const [deletingId, setDeletingId] = useState(null);
   const [imageMode, setImageMode] = useState('upload');
   const [imagePreview, setImagePreview] = useState(null);
+  const [placement, setPlacement] = useState('default'); // 'default' (bottom) | 'top' | 'after'
+  const [insertAfterId, setInsertAfterId] = useState('');
   const fileInputRef = useRef(null);
 
   const loadCertificates = async () => {
@@ -56,7 +58,19 @@ export function CertificateManager() {
     });
     setImagePreview(null);
     setImageMode('upload');
+    setPlacement('default');
+    setInsertAfterId(certList.length > 0 ? (certList[certList.length - 1].id || certList[certList.length - 1].title) : '');
     setIsEditing(true);
+  };
+
+  const handleMove = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= certList.length) return;
+    const updated = [...certList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(target, 0, moved);
+    setCertList(updated);
+    await persistContentToDatabase('certificates', updated);
   };
 
   /* ── Image helpers ── */
@@ -118,7 +132,20 @@ export function CertificateManager() {
     if (exists) {
       updated = certList.map((c) => (c.id === certToSave.id ? certToSave : c));
     } else {
-      updated = [...certList, certToSave];
+      if (placement === 'top') {
+        updated = [certToSave, ...certList];
+      } else if (placement === 'after' && insertAfterId) {
+        const idx = certList.findIndex((c) => (c.id || c.title) === insertAfterId);
+        if (idx !== -1) {
+          updated = [...certList];
+          updated.splice(idx + 1, 0, certToSave);
+        } else {
+          updated = [...certList, certToSave];
+        }
+      } else {
+        // default: at the end
+        updated = [...certList, certToSave];
+      }
     }
 
     setIsSaving(true);
@@ -189,7 +216,7 @@ export function CertificateManager() {
                   <th className="py-3.5 px-4 font-normal">Year</th>
                   <th className="py-3.5 px-4 font-normal">Badge</th>
                   <th className="py-3.5 px-4 font-normal">Link</th>
-                  <th className="py-3.5 px-4 font-normal text-right">Actions</th>
+                  <th className="py-3.5 px-4 font-normal text-right">Order &amp; Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -223,8 +250,28 @@ export function CertificateManager() {
                       )}
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button type="button" onClick={() => handleOpenEdit(cert)} className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer" title="Edit Certificate">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Reorder Buttons */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMove(idx, -1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === certList.length - 1}
+                          onClick={() => handleMove(idx, 1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button type="button" onClick={() => handleOpenEdit(cert)} className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer ml-1" title="Edit Certificate">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button type="button" onClick={() => setCertToDelete(cert)} className="p-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Delete Certificate">
@@ -309,6 +356,75 @@ export function CertificateManager() {
                   className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
                 />
               </div>
+
+              {/* Placement / Custom Ordering Selector (Only when adding new certificate) */}
+              {!certList.some((c) => c.id === currentCert.id) && certList.length > 0 && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 font-mono">
+                  <label className="text-xs uppercase text-white/70 block font-semibold flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Certificate Placement / Position</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('default')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'default'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the End (Default)</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Appends to last</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('top')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'top'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the Top</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Position #01</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('after')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'after'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">Custom: Insert After...</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Pick specific item</span>
+                    </button>
+                  </div>
+
+                  {placement === 'after' && (
+                    <div className="pt-2 border-t border-white/10">
+                      <label className="text-[11px] uppercase text-white/60 block mb-1">
+                        Insert directly after this certificate:
+                      </label>
+                      <select
+                        value={insertAfterId}
+                        onChange={(e) => setInsertAfterId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/20 text-white text-xs font-mono focus:outline-none focus:border-purple-400 cursor-pointer"
+                      >
+                        {certList.map((c, idx) => (
+                          <option key={c.id || idx} value={c.id || c.title} className="bg-neutral-900 text-white">
+                            #{idx + 1} — {c.title} ({c.issuer})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ── IMAGE / PHOTO UPLOAD ── */}
               <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-4 space-y-3">

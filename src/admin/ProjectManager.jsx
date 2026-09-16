@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, Star, ExternalLink, Image as ImageIcon, Upload, X, Check, Code, Calendar, Hash, RefreshCw, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { projects as initialProjects } from '../data/projects.js';
 import { compressImage, persistProjects, fetchProjectsFromDatabase, deleteProjectFromDatabase } from '../services/storageService.js';
 
@@ -16,6 +16,8 @@ export function ProjectManager() {
   const [techInput, setTechInput] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
   const [saveNotification, setSaveNotification] = useState('');
+  const [placement, setPlacement] = useState('default'); // 'default' | 'top' | 'bottom' | 'after'
+  const [insertAfterId, setInsertAfterId] = useState('');
 
   // Load directly from MongoDB Cloud Database on mount & refresh
   useEffect(() => {
@@ -122,7 +124,23 @@ export function ProjectManager() {
       featured: true,
     });
     setTechInput('React, JavaScript, Tailwind CSS');
+    setPlacement('default');
+    setInsertAfterId(projectList.length > 0 ? projectList[projectList.length - 1].id : '');
     setIsEditing(true);
+  };
+
+  const handleMove = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= projectList.length) return;
+    const updated = [...projectList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(target, 0, moved);
+    const renumbered = updated.map((p, i) => ({
+      ...p,
+      number: (i + 1).toString().padStart(2, '0'),
+    }));
+    setProjectList(renumbered);
+    await saveToStorage(renumbered);
   };
 
   const handleImageFileUpload = async (e, galleryIndex = null) => {
@@ -194,7 +212,25 @@ export function ProjectManager() {
     if (exists) {
       updated = projectList.map((p) => (p.id === projectToSave.id ? projectToSave : p));
     } else {
-      updated = [...projectList, projectToSave];
+      if (placement === 'top') {
+        updated = [projectToSave, ...projectList];
+      } else if (placement === 'after' && insertAfterId) {
+        const idx = projectList.findIndex((p) => p.id === insertAfterId);
+        if (idx !== -1) {
+          updated = [...projectList];
+          updated.splice(idx + 1, 0, projectToSave);
+        } else {
+          updated = [...projectList, projectToSave];
+        }
+      } else {
+        // default: at the end
+        updated = [...projectList, projectToSave];
+      }
+      // Renumber sequence numbers cleanly
+      updated = updated.map((p, i) => ({
+        ...p,
+        number: (i + 1).toString().padStart(2, '0'),
+      }));
     }
 
     // Await database write to guarantee data persistence before closing modal
@@ -250,11 +286,11 @@ export function ProjectManager() {
                 <th className="py-3.5 px-4">Title &amp; Category</th>
                 <th className="py-3.5 px-4">Year</th>
                 <th className="py-3.5 px-4">Featured</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4 text-right">Order &amp; Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06] text-xs">
-              {projectList.map((p) => (
+              {projectList.map((p, index) => (
                 <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-4 font-mono text-white/40 font-bold">{p.number}</td>
 
@@ -311,11 +347,31 @@ export function ProjectManager() {
                   </td>
 
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {/* Reorder Buttons */}
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => handleMove(index, -1)}
+                        className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        title="Move Up"
+                      >
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === projectList.length - 1}
+                        onClick={() => handleMove(index, 1)}
+                        className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        title="Move Down"
+                      >
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(p)}
-                        className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer ml-1"
                         title="Edit project & photos"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -423,6 +479,75 @@ export function ProjectManager() {
                   />
                 </div>
               </div>
+
+              {/* Placement / Custom Ordering Selector (Only when adding new project) */}
+              {!projectList.some((p) => p.id === currentProject.id) && projectList.length > 0 && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+                  <label className="text-xs font-mono uppercase text-white/70 block font-semibold flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Showcase Placement / Position</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('default')}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono border transition-all text-left cursor-pointer ${
+                        placement === 'default'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the End (Default)</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Appends to last</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('top')}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono border transition-all text-left cursor-pointer ${
+                        placement === 'top'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the Top</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Position #01</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('after')}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono border transition-all text-left cursor-pointer ${
+                        placement === 'after'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">Custom: Insert After...</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Pick specific place</span>
+                    </button>
+                  </div>
+
+                  {placement === 'after' && (
+                    <div className="pt-2 border-t border-white/10">
+                      <label className="text-[11px] font-mono uppercase text-white/60 block mb-1">
+                        Insert directly after this project:
+                      </label>
+                      <select
+                        value={insertAfterId}
+                        onChange={(e) => setInsertAfterId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/20 text-white text-xs font-mono focus:outline-none focus:border-purple-400 cursor-pointer"
+                      >
+                        {projectList.map((p, idx) => (
+                          <option key={p.id} value={p.id} className="bg-neutral-900 text-white">
+                            #{p.number || idx + 1} — {p.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Description */}
               <div>

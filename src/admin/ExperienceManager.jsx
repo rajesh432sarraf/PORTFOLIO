@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Briefcase, MapPin, Calendar, Building, X, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, Briefcase, MapPin, Calendar, Building, X, RefreshCw, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
 
 export function ExperienceManager() {
@@ -11,6 +11,8 @@ export function ExperienceManager() {
   const [techInput, setTechInput] = useState('');
   const [experienceToDelete, setExperienceToDelete] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [placement, setPlacement] = useState('default'); // 'default' (top) | 'bottom' | 'after'
+  const [insertAfterId, setInsertAfterId] = useState('');
 
   const loadExperiences = async () => {
     setIsLoading(true);
@@ -55,7 +57,19 @@ export function ExperienceManager() {
       technologies: ['React', 'JavaScript', 'Tailwind CSS'],
     });
     setTechInput('React, JavaScript, Tailwind CSS');
+    setPlacement('default');
+    setInsertAfterId(experienceList.length > 0 ? (experienceList[0].id || experienceList[0].role) : '');
     setIsEditing(true);
+  };
+
+  const handleMove = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= experienceList.length) return;
+    const updated = [...experienceList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(target, 0, moved);
+    setExperienceList(updated);
+    await persistContentToDatabase('experience', updated);
   };
 
   const handleSave = async (e) => {
@@ -79,7 +93,20 @@ export function ExperienceManager() {
     if (currentExp._index >= 0) {
       updated = experienceList.map((exp, i) => (i === currentExp._index ? expToSave : exp));
     } else {
-      updated = [expToSave, ...experienceList];
+      if (placement === 'bottom') {
+        updated = [...experienceList, expToSave];
+      } else if (placement === 'after' && insertAfterId) {
+        const idx = experienceList.findIndex((exp) => (exp.id || exp.role) === insertAfterId);
+        if (idx !== -1) {
+          updated = [...experienceList];
+          updated.splice(idx + 1, 0, expToSave);
+        } else {
+          updated = [expToSave, ...experienceList];
+        }
+      } else {
+        // default: at the top
+        updated = [expToSave, ...experienceList];
+      }
     }
 
     setIsSaving(true);
@@ -153,7 +180,7 @@ export function ExperienceManager() {
                   <th className="py-3.5 px-4 font-normal">Period</th>
                   <th className="py-3.5 px-4 font-normal">Location</th>
                   <th className="py-3.5 px-4 font-normal">Tech Stack</th>
-                  <th className="py-3.5 px-4 font-normal text-right">Actions</th>
+                  <th className="py-3.5 px-4 font-normal text-right">Order &amp; Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
@@ -194,11 +221,31 @@ export function ExperienceManager() {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Reorder Buttons */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMove(idx, -1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === experienceList.length - 1}
+                          onClick={() => handleMove(idx, 1)}
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(exp, idx)}
-                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors cursor-pointer ml-1"
                           title="Edit Experience"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -315,6 +362,75 @@ export function ExperienceManager() {
                   className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono leading-relaxed"
                 />
               </div>
+
+              {/* Placement / Custom Ordering Selector (Only when adding new experience) */}
+              {currentExp._index < 0 && experienceList.length > 0 && (
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 font-mono">
+                  <label className="text-xs uppercase text-white/70 block font-semibold flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Timeline Placement / Position</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('default')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'default'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the Top (Default)</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Latest Role first</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('bottom')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'bottom'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">At the End</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Bottom of timeline</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPlacement('after')}
+                      className={`px-3 py-2 rounded-xl text-xs border transition-all text-left cursor-pointer ${
+                        placement === 'after'
+                          ? 'bg-purple-500/20 border-purple-500/50 text-white font-semibold shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                          : 'bg-white/[0.02] border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      <span className="block font-bold">Custom: Insert After...</span>
+                      <span className="text-[10px] text-white/40 block mt-0.5">Pick specific role</span>
+                    </button>
+                  </div>
+
+                  {placement === 'after' && (
+                    <div className="pt-2 border-t border-white/10">
+                      <label className="text-[11px] uppercase text-white/60 block mb-1">
+                        Insert directly after this role:
+                      </label>
+                      <select
+                        value={insertAfterId}
+                        onChange={(e) => setInsertAfterId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-white/20 text-white text-xs font-mono focus:outline-none focus:border-purple-400 cursor-pointer"
+                      >
+                        {experienceList.map((exp, idx) => (
+                          <option key={exp.id || idx} value={exp.id || exp.role} className="bg-neutral-900 text-white">
+                            #{idx + 1} — {exp.role} ({exp.organization})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-mono uppercase text-white/60 block mb-1">
