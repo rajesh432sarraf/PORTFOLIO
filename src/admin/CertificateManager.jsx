@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Edit2, Trash2, Award, CheckCircle2, ExternalLink, X, RefreshCw, Upload, Image as ImageIcon, Link, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase } from '../services/storageService.js';
+import { fetchContentFromDatabase, persistContentToDatabase, deleteContentItemFromDatabase, compressImage } from '../services/storageService.js';
 
 export function CertificateManager() {
   const [certList, setCertList] = useState([]);
@@ -74,34 +74,24 @@ export function CertificateManager() {
   };
 
   /* ── Image helpers ── */
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { alert('Please select a valid image file.'); return; }
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result;
-      if (file.size > 800 * 1024) {
-        const img = new window.Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX = 1200;
-          let { width, height } = img;
-          if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
-          canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.82);
-          setImagePreview(compressed);
-          setCurrentCert((prev) => ({ ...prev, image: compressed }));
-        };
-        img.src = base64;
-      } else {
-        setImagePreview(base64);
-        setCurrentCert((prev) => ({ ...prev, image: base64 }));
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file, 1000, 0.72);
+      setImagePreview(compressed);
+      setCurrentCert((prev) => ({ ...prev, image: compressed }));
+    } catch (err) {
+      console.warn('Compression failed, using fallback reader:', err);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setImagePreview(ev.target.result);
+        setCurrentCert((prev) => ({ ...prev, image: ev.target.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleUrlChange = (url) => {

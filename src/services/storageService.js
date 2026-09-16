@@ -416,9 +416,85 @@ export async function deleteMessageFromDatabase(messageId) {
     console.warn('Error deleting message from MongoDB:', err);
   }
 
+  // Also remove from local IndexedDB cache
+  try {
+    const cacheKey = 'rajesh_portfolio_messages';
+    const cached = (await getFromIndexedDB(cacheKey)) || [];
+    const filtered = cached.filter((m) => (m._id || m.id) !== messageId);
+    await setInIndexedDB(cacheKey, filtered);
+  } catch (e) {}
+
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('portfolio_data_updated'));
   }
 
   return cloudSuccess;
+}
+
+/**
+ * Fetches messages directly from MongoDB Atlas /api/contact, with IndexedDB caching.
+ * Eliminates 5MB localStorage limits and prevents QuotaExceededError.
+ */
+export async function fetchMessagesFromDatabase() {
+  const cacheKey = 'rajesh_portfolio_messages';
+  try {
+    const res = await fetch('/api/contact', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.messages)) {
+        await setInIndexedDB(cacheKey, data.messages);
+        return data.messages;
+      }
+    }
+  } catch (err) {
+    console.warn('MongoDB fetch error for messages:', err);
+  }
+
+  // Fallback to IndexedDB (virtually unlimited quota)
+  try {
+    const cached = await getFromIndexedDB(cacheKey);
+    if (cached && Array.isArray(cached)) {
+      return cached;
+    }
+  } catch (e) {}
+
+  return [];
+}
+
+/**
+ * Saves a message to local resilient IndexedDB cache.
+ */
+export async function saveMessageToLocalCache(messageItem) {
+  const cacheKey = 'rajesh_portfolio_messages';
+  try {
+    const existing = (await getFromIndexedDB(cacheKey)) || [];
+    const updated = [messageItem, ...existing.filter((m) => (m._id || m.id) !== (messageItem._id || messageItem.id))];
+    await setInIndexedDB(cacheKey, updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('portfolio_data_updated'));
+    }
+    return true;
+  } catch (err) {
+    console.warn('Failed to cache message in IndexedDB:', err);
+    return false;
+  }
+}
+
+/**
+ * Persists messages array to IndexedDB cache.
+ */
+export async function persistMessagesToCache(messagesArray) {
+  const cacheKey = 'rajesh_portfolio_messages';
+  try {
+    await setInIndexedDB(cacheKey, messagesArray);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('portfolio_data_updated'));
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
 }

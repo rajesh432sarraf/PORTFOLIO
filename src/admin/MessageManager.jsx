@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Check, Archive, Trash2, Clock, CheckCheck, RefreshCw, Sparkles, Inbox } from 'lucide-react';
-import { deleteMessageFromDatabase } from '../services/storageService.js';
+import { fetchMessagesFromDatabase, deleteMessageFromDatabase, persistMessagesToCache } from '../services/storageService.js';
 
 export function MessageManager() {
   const [messages, setMessages] = useState([]);
@@ -10,54 +10,32 @@ export function MessageManager() {
 
   const loadMessages = async () => {
     setIsLoading(true);
-    let loaded = null;
-
     try {
-      const response = await fetch('/api/contact');
-      if (response.ok) {
-        const data = await response.json();
-        if (data && Array.isArray(data.messages)) {
-          loaded = data.messages;
-          try {
-            localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(data.messages));
-          } catch (e) {}
-        }
-      }
-    } catch (apiErr) {
-      console.warn('Could not fetch messages from API, using fallback:', apiErr);
+      const data = await fetchMessagesFromDatabase();
+      setMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.warn('Could not fetch messages:', err);
+      setMessages([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    if (loaded === null) {
-      try {
-        const saved = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-        loaded = Array.isArray(saved) ? saved : [];
-      } catch (e) {
-        loaded = [];
-      }
-    }
-
-    setMessages(loaded || []);
-    setIsLoading(false);
   };
 
   useEffect(() => {
     loadMessages();
     const handleUpdate = () => loadMessages();
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
 
-  const saveToStorage = (updated) => {
+  const saveToStorage = async (updated) => {
     setMessages(updated);
     try {
-      localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(updated));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
+      await persistMessagesToCache(updated);
     } catch (e) {
-      console.error('Failed to save messages to localStorage', e);
+      console.error('Failed to save messages to cache', e);
     }
   };
 

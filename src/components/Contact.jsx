@@ -4,6 +4,7 @@ import { Send, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react';
 import FadeIn from './FadeIn.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import { easeEditorial } from '../lib/animations.js';
+import { fetchMessagesFromDatabase, saveMessageToLocalCache } from '../services/storageService.js';
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -14,29 +15,30 @@ export function Contact() {
     honeypot: '', // Spam bot protection
   });
 
-  const [publicNotes, setPublicNotes] = useState(() => {
-    try {
-      const msgs = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-      return msgs.filter((m) => m.showOnWebsite);
-    } catch (e) {
-      return [];
-    }
-  });
+  const [publicNotes, setPublicNotes] = useState([]);
 
   useEffect(() => {
-    const handleUpdate = () => {
+    let isMounted = true;
+    const loadNotes = async () => {
       try {
-        const msgs = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-        setPublicNotes(msgs.filter((m) => m.showOnWebsite));
+        const msgs = await fetchMessagesFromDatabase();
+        if (isMounted) {
+          setPublicNotes(msgs.filter((m) => m.showOnWebsite));
+        }
       } catch (e) {
-        setPublicNotes([]);
+        if (isMounted) setPublicNotes([]);
       }
     };
+
+    loadNotes();
+
+    const handleUpdate = () => {
+      loadNotes();
+    };
     window.addEventListener('portfolio_data_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
     return () => {
+      isMounted = false;
       window.removeEventListener('portfolio_data_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
     };
   }, []);
 
@@ -120,9 +122,8 @@ export function Contact() {
         }),
       });
 
-      // Always backup in local storage for offline / single-device testing
-      const savedMessages = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-      savedMessages.unshift({
+      // Resilient backup in local database cache (zero quota crash)
+      const newMsg = {
         _id: `msg_${Date.now()}`,
         name: formData.name,
         email: formData.email,
@@ -130,16 +131,14 @@ export function Contact() {
         message: formData.message,
         createdAt: new Date().toISOString(),
         status: 'new',
-      });
-      localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(savedMessages));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
+      };
+      await saveMessageToLocalCache(newMsg);
 
       setStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
     } catch (err) {
       // Resilient fallback for local testing
-      const savedMessages = JSON.parse(localStorage.getItem('rajesh_portfolio_messages') || '[]');
-      savedMessages.unshift({
+      const newMsg = {
         _id: `msg_${Date.now()}`,
         name: formData.name,
         email: formData.email,
@@ -147,9 +146,8 @@ export function Contact() {
         message: formData.message,
         createdAt: new Date().toISOString(),
         status: 'new',
-      });
-      localStorage.setItem('rajesh_portfolio_messages', JSON.stringify(savedMessages));
-      window.dispatchEvent(new Event('portfolio_data_updated'));
+      };
+      await saveMessageToLocalCache(newMsg);
 
       setStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '', honeypot: '' });
