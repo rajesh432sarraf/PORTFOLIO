@@ -118,7 +118,7 @@ export function CertificateManager() {
     if (exists) {
       updated = certList.map((c) => (c.id === certToSave.id ? certToSave : c));
     } else {
-      updated = [certToSave, ...certList];
+      updated = [...certList, certToSave];
     }
 
     setIsSaving(true);

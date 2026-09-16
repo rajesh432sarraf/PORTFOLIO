@@ -122,7 +122,7 @@ export function AchievementManager() {
     if (currentAch._index >= 0) {
       updated = achievementList.map((ach, i) => (i === currentAch._index ? achToSave : ach));
     } else {
-      updated = [achToSave, ...achievementList];
+      updated = [...achievementList, achToSave];
     }
 
     setIsSaving(true);
