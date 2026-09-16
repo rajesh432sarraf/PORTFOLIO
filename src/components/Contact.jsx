@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, CheckCircle2, AlertCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react';
 import FadeIn from './FadeIn.jsx';
 import MagneticButton from './MagneticButton.jsx';
 import { easeEditorial } from '../lib/animations.js';
@@ -362,9 +362,12 @@ export function Contact() {
 
                 {/* Submit Row */}
                 <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <span className="text-xs font-mono text-[#D7E2EA]/40 flex items-center gap-1.5 order-2 sm:order-1">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Response within 24–48 hours</span>
+                  <span className="text-xs font-mono text-[#D7E2EA]/60 flex items-center gap-2 order-2 sm:order-1">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                    </span>
+                    <span>Direct Message Protocol • Guaranteed response &lt; 24h</span>
                   </span>
 
                   <MagneticButton strength={0.25} className="w-full sm:w-auto order-1 sm:order-2">

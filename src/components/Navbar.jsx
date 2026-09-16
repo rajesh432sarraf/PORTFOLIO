@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowUpRight, Lock, Eye } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Eye } from 'lucide-react';
 import MagneticButton from './MagneticButton.jsx';
 import ResumeModal from './ResumeModal.jsx';
 import { easeEditorial } from '../lib/animations.js';
+
+// Clean SVG for GitHub
+function GitHubIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+      <path d="M9 18c-4.51 2-5-2-7-2" />
+    </svg>
+  );
+}
 
 const NAV_ITEMS = [
   { label: 'About', href: '#about' },
@@ -23,39 +33,32 @@ export function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 40);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // IntersectionObserver for active section tracking
   useEffect(() => {
-    const sectionIds = ['about', 'skills', 'services', 'projects', 'experience', 'achievements', 'contact'];
-    const observers = [];
+    const sections = NAV_ITEMS.map((item) => item.href.replace('#', '')).filter(Boolean);
 
-    const observerCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(`#${entry.target.id}`);
-        }
-      });
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '-20% 0px -70% 0px',
+        threshold: 0,
+      }
+    );
 
-    const observerOptions = {
-      root: null,
-      rootMargin: '-30% 0px -50% 0px',
-      threshold: 0,
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    sectionIds.forEach((id) => {
+    sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
@@ -74,14 +77,11 @@ export function Navbar() {
 
   return (
     <>
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: easeEditorial, delay: 0 }}
-        className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#0C0C0C]/80 backdrop-blur-md py-4 border-b border-white/[0.04]'
-            : 'bg-transparent py-5 sm:py-6 lg:py-8'
+            ? 'py-3 backdrop-blur-xl bg-[#090D0F]/85 border-b border-white/10 shadow-2xl'
+            : 'py-5 sm:py-6 bg-transparent'
         } px-5 sm:px-8 lg:px-10`}
       >
         <nav
@@ -91,17 +91,20 @@ export function Navbar() {
           {/* Brand Logo / Identity - Extreme Left */}
           <motion.a
             href="#"
-            whileHover={{ scale: 1.04 }}
+            whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="group flex items-center gap-3 text-lg sm:text-xl lg:text-2xl font-black tracking-widest uppercase flex-shrink-0 select-none cursor-pointer"
+            className="group flex items-center gap-2.5 sm:gap-3 text-lg sm:text-xl lg:text-2xl font-black tracking-widest uppercase flex-shrink-0 select-none cursor-pointer"
             aria-label="Rajesh Kumar Home"
           >
-            <span className="relative flex h-3.5 w-3.5 items-center justify-center">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B600A8] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E000B8] shadow-[0_0_10px_#E000B8]"></span>
+            <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
             </span>
-            <span className="font-kanit font-black tracking-wider bg-gradient-to-r from-[#F030C8] via-[#B600A8] to-[#8C1BAB] bg-clip-text text-transparent drop-shadow-[0_0_16px_rgba(182,0,168,0.6)] group-hover:drop-shadow-[0_0_22px_rgba(224,0,184,0.85)] transition-all duration-300">
+            <span className="font-kanit font-black tracking-wider text-white group-hover:text-[#D7E2EA] transition-colors">
               RAJESH KUMAR
+            </span>
+            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 font-medium lowercase tracking-normal">
+              open for roles
             </span>
           </motion.a>
 
@@ -135,13 +138,13 @@ export function Navbar() {
               })}
             </ul>
 
-            {/* Right Action: Resume & Login Buttons */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            {/* Right Action: Resume & GitHub Profile Buttons */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
               <MagneticButton strength={0.25} className="hidden sm:block">
                 <button
                   type="button"
                   onClick={() => setIsResumeModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest font-medium rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/10 hover:border-white/40 transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest font-medium rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/10 hover:border-white/40 transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer"
                   aria-label="View Resume"
                 >
                   <Eye className="w-3.5 h-3.5 text-purple-400" />
@@ -149,15 +152,17 @@ export function Navbar() {
                 </button>
               </MagneticButton>
 
-              {/* Admin Login Button */}
+              {/* GitHub Developer Link */}
               <a
-                href="/admin/login"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs uppercase tracking-widest font-mono text-white/50 hover:text-white border border-white/10 hover:border-white/30 rounded-full hover:bg-white/[0.05] transition-all"
-                title="Admin CMS Portal"
-                aria-label="Admin CMS Portal"
+                href="https://github.com/rajeshsarraf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 text-xs uppercase tracking-wider font-mono text-white/70 hover:text-white border border-white/15 hover:border-white/40 rounded-full hover:bg-white/[0.06] transition-all"
+                title="GitHub Profile (rajeshsarraf)"
+                aria-label="GitHub Profile"
               >
-                <Lock className="w-3 h-3 text-emerald-400" />
-                <span>Login</span>
+                <GitHubIcon className="w-3.5 h-3.5 text-white/80" />
+                <span>GitHub</span>
               </a>
 
               {/* Mobile Hamburger Toggle */}
@@ -177,7 +182,7 @@ export function Navbar() {
             </div>
           </div>
         </nav>
-      </motion.header>
+      </header>
 
       {/* Mobile Drawer Menu */}
       <AnimatePresence>
@@ -222,12 +227,14 @@ export function Navbar() {
               </button>
 
               <a
-                href="/admin/login"
+                href="https://github.com/rajeshsarraf"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full border border-white/10 bg-white/[0.02] text-white/60 uppercase tracking-widest text-xs font-mono hover:text-white hover:bg-white/10 transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full border border-white/10 bg-white/[0.02] text-white/80 uppercase tracking-widest text-xs font-mono hover:text-white hover:bg-white/10 transition-colors"
               >
-                <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Admin Login</span>
+                <GitHubIcon className="w-4 h-4 text-white/80" />
+                <span>GitHub Profile</span>
               </a>
 
               <p className="text-xs uppercase tracking-widest text-white/40 text-center">
