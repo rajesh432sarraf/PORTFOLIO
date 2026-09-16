@@ -91,17 +91,18 @@ export function Navbar() {
           {/* Brand Logo / Identity - Extreme Left */}
           <motion.a
             href="#"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="group relative flex flex-col items-start flex-shrink-0 select-none cursor-pointer py-1"
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            className="group relative flex flex-col items-start flex-shrink-0 select-none cursor-pointer py-1 origin-left"
             aria-label="Rajesh Kumar Home"
           >
-            <span className="font-kanit font-black text-lg sm:text-xl lg:text-2xl tracking-wider group-hover:tracking-[0.13em] uppercase bg-gradient-to-r from-white via-[#EAEFF4] to-[#BBCCD7] group-hover:from-white group-hover:via-[#E9D5FF] group-hover:to-[#D946EF] bg-clip-text text-transparent drop-shadow-sm group-hover:drop-shadow-[0_0_16px_rgba(192,132,252,0.45)] transition-all duration-300 ease-out">
+            <span className="font-kanit font-black text-lg sm:text-xl lg:text-2xl tracking-wider group-hover:tracking-[0.13em] uppercase brand-gradient-flow transition-all duration-300 ease-out">
               RAJESH KUMAR
             </span>
 
             {/* Precision Kinetic Glowing Underline */}
-            <span className="absolute -bottom-0.5 left-0 w-0 h-[2px] rounded-full bg-gradient-to-r from-white via-[#BBCCD7] to-[#C084FC] opacity-0 group-hover:w-full group-hover:opacity-100 transition-all duration-300 ease-out shadow-[0_0_8px_rgba(192,132,252,0.6)]" />
+            <span className="absolute -bottom-0.5 left-0 w-0 h-[2px] rounded-full bg-gradient-to-r from-white via-[#E9D5FF] to-[#D946EF] opacity-0 group-hover:w-full group-hover:opacity-100 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(217,70,239,0.7)]" />
           </motion.a>
 
           {/* Right Aligned Navigation Group (Links + Action Buttons) */}

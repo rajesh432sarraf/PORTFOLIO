@@ -135,9 +135,41 @@ html.lenis body {
   transition: background-color 0.2s ease;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(182, 0, 168, 0.8);
+/* Continuous Flowing Gradient Animation for Brand Name */
+@keyframes brandGradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
+
+.brand-gradient-flow {
+  background: linear-gradient(
+    110deg,
+    #FFFFFF 0%,
+    #F3E8FF 20%,
+    #E9D5FF 40%,
+    #E000B8 65%,
+    #D946EF 85%,
+    #FFFFFF 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brandGradientFlow 5s ease-in-out infinite;
+}
+
+.group:hover .brand-gradient-flow {
+  animation-duration: 2.8s;
+  filter: drop-shadow(0 0 16px rgba(224, 0, 184, 0.45));
+}
+
 
 /* Reduced Motion Override */
 @media (prefers-reduced-motion: reduce) {
