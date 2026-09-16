@@ -42,12 +42,22 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Reusable Hero Gradient Typography */
+/* Reusable Hero & Big Section Headings Gradient Typography with Continuous Flow */
 .hero-heading {
-  background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%);
+  background: linear-gradient(
+    110deg,
+    #FFFFFF 0%,
+    #F3E8FF 20%,
+    #E9D5FF 40%,
+    #E000B8 65%,
+    #D946EF 85%,
+    #FFFFFF 100%
+  );
+  background-size: 260% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: brandGradientFlow 6s ease-in-out infinite;
 }
 
 /* Premium Interactive Contact Button Gradient & Animations */
