@@ -42,22 +42,34 @@ html.lenis body {
   pointer-events: none;
 }
 
+/* Continuous Multi-Hue Liquid Gradient Flow (Never Monocolor / Always Mixed) */
+@keyframes mixedLiquidFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
 /* Reusable Hero & Big Section Headings Gradient Typography with Continuous Flow */
 .hero-heading {
   background: linear-gradient(
     110deg,
     #FFFFFF 0%,
-    #F3E8FF 20%,
-    #E9D5FF 40%,
-    #E000B8 65%,
-    #D946EF 85%,
-    #FFFFFF 100%
+    #D7E2EA 14%,
+    #F0ABFC 28%,
+    #E000B8 42%,
+    #9333EA 56%,
+    #E9D5FF 70%,
+    #FFFFFF 84%,
+    #D7E2EA 100%
   );
-  background-size: 260% 100%;
+  background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: brandGradientFlow 6s ease-in-out infinite;
+  animation: mixedLiquidFlow 8s linear infinite;
 }
 
 /* Premium Interactive Contact Button Gradient & Animations */
@@ -145,38 +157,27 @@ html.lenis body {
   transition: background-color 0.2s ease;
 }
 
-/* Continuous Flowing Gradient Animation for Brand Name */
-@keyframes brandGradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 .brand-gradient-flow {
   background: linear-gradient(
     110deg,
     #FFFFFF 0%,
-    #F3E8FF 20%,
-    #E9D5FF 40%,
-    #E000B8 65%,
-    #D946EF 85%,
-    #FFFFFF 100%
+    #D7E2EA 14%,
+    #F0ABFC 28%,
+    #E000B8 42%,
+    #9333EA 56%,
+    #E9D5FF 70%,
+    #FFFFFF 84%,
+    #D7E2EA 100%
   );
-  background-size: 260% 100%;
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: brandGradientFlow 5s ease-in-out infinite;
+  animation: mixedLiquidFlow 8s linear infinite;
 }
 
 .group:hover .brand-gradient-flow {
-  animation-duration: 2.8s;
+  animation-duration: 4.5s;
   filter: drop-shadow(0 0 16px rgba(224, 0, 184, 0.45));
 }
 
