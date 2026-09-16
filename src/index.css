@@ -58,10 +58,10 @@ html.lenis body {
     110deg,
     #FFFFFF 0%,
     #D7E2EA 14%,
-    #F0ABFC 28%,
-    #E000B8 42%,
-    #9333EA 56%,
-    #E9D5FF 70%,
+    color-mix(in srgb, #F0ABFC 40%, #FFFFFF) 28%,
+    color-mix(in srgb, #E000B8 40%, #FFFFFF) 42%,
+    color-mix(in srgb, #9333EA 40%, #FFFFFF) 56%,
+    color-mix(in srgb, #E9D5FF 40%, #FFFFFF) 70%,
     #FFFFFF 84%,
     #D7E2EA 100%
   );
@@ -162,10 +162,10 @@ html.lenis body {
     110deg,
     #FFFFFF 0%,
     #D7E2EA 14%,
-    #F0ABFC 28%,
-    #E000B8 42%,
-    #9333EA 56%,
-    #E9D5FF 70%,
+    color-mix(in srgb, #F0ABFC 40%, #FFFFFF) 28%,
+    color-mix(in srgb, #E000B8 40%, #FFFFFF) 42%,
+    color-mix(in srgb, #9333EA 40%, #FFFFFF) 56%,
+    color-mix(in srgb, #E9D5FF 40%, #FFFFFF) 70%,
     #FFFFFF 84%,
     #D7E2EA 100%
   );

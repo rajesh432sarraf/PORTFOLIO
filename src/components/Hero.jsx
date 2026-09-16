@@ -1,50 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import MagneticButton from './MagneticButton.jsx';
 import { easeEditorial } from '../lib/animations.js';
 
 export function Hero() {
-  const containerRef = useRef(null);
-  const [canParallax, setCanParallax] = useState(false);
-
-  // Parallax motion values for portrait
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 25, stiffness: 120, mass: 0.2 };
-  const smoothX = useSpring(mouseX, springConfig);
-  const smoothY = useSpring(mouseY, springConfig);
-
-  const portraitTiltX = useTransform(smoothY, [-0.5, 0.5], [6, -6]);
-  const portraitTiltY = useTransform(smoothX, [-0.5, 0.5], [-8, 8]);
-  const portraitTranslateX = useTransform(smoothX, [-0.5, 0.5], [-12, 12]);
-  const portraitTranslateY = useTransform(smoothY, [-0.5, 0.5], [-8, 8]);
-
-  useEffect(() => {
-    const isFine = window.matchMedia('(pointer: fine)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setCanParallax(isFine && !reducedMotion);
-  }, []);
-
-  const handleMouseMove = (e) => {
-    if (!canParallax || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const normalizedX = (e.clientX - rect.left) / rect.width - 0.5;
-    const normalizedY = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(normalizedX);
-    mouseY.set(normalizedY);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
   return (
     <section
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       className="relative min-h-[100svh] w-full flex flex-col justify-between overflow-hidden px-5 sm:px-8 lg:px-12 pt-24 sm:pt-28 lg:pt-32 pb-8 sm:pb-10 selection:bg-[#7621B0]/40"
       aria-label="Hero Section"
     >
@@ -138,17 +99,6 @@ export function Hero() {
               ease: easeEditorial,
               delay: 0.3,
             }}
-            style={
-              canParallax
-                ? {
-                    x: portraitTranslateX,
-                    y: portraitTranslateY,
-                    rotateX: portraitTiltX,
-                    rotateY: portraitTiltY,
-                    perspective: 1000,
-                  }
-                : {}
-            }
             className="relative flex justify-center items-end w-full max-w-[520px]"
           >
             {/* Cutout Image with zero box, zero border, and soft waist fade */}
