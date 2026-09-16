@@ -13,9 +13,16 @@ import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import BackToTop from './components/BackToTop.jsx';
 import NotFound from './components/NotFound.jsx';
-import AdminLogin from './admin/AdminLogin.jsx';
-import AdminDashboard from './admin/AdminDashboard.jsx';
 import useLenis from './hooks/useLenis.js';
+
+const AdminLogin = React.lazy(() => import('./admin/AdminLogin.jsx'));
+const AdminDashboard = React.lazy(() => import('./admin/AdminDashboard.jsx'));
+
+const AdminFallback = () => (
+  <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center text-white/50 font-mono text-xs tracking-widest uppercase">
+    Loading Studio...
+  </div>
+);
 
 export function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -41,20 +48,7 @@ export function App() {
   // 1. Admin Login Route
   if (currentPath === '/admin/login') {
     return (
-      <AdminLogin
-        onLoginSuccess={() => {
-          setIsAdminAuthenticated(true);
-          window.history.pushState({}, '', '/admin');
-          setCurrentPath('/admin');
-        }}
-      />
-    );
-  }
-
-  // 2. Admin Dashboard Route (Protected)
-  if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
-    if (!isAdminAuthenticated) {
-      return (
+      <React.Suspense fallback={<AdminFallback />}>
         <AdminLogin
           onLoginSuccess={() => {
             setIsAdminAuthenticated(true);
@@ -62,16 +56,35 @@ export function App() {
             setCurrentPath('/admin');
           }}
         />
+      </React.Suspense>
+    );
+  }
+
+  // 2. Admin Dashboard Route (Protected)
+  if (currentPath === '/admin' || currentPath.startsWith('/admin/')) {
+    if (!isAdminAuthenticated) {
+      return (
+        <React.Suspense fallback={<AdminFallback />}>
+          <AdminLogin
+            onLoginSuccess={() => {
+              setIsAdminAuthenticated(true);
+              window.history.pushState({}, '', '/admin');
+              setCurrentPath('/admin');
+            }}
+          />
+        </React.Suspense>
       );
     }
     return (
-      <AdminDashboard
-        onLogout={() => {
-          setIsAdminAuthenticated(false);
-          window.history.pushState({}, '', '/admin/login');
-          setCurrentPath('/admin/login');
-        }}
-      />
+      <React.Suspense fallback={<AdminFallback />}>
+        <AdminDashboard
+          onLogout={() => {
+            setIsAdminAuthenticated(false);
+            window.history.pushState({}, '', '/admin/login');
+            setCurrentPath('/admin/login');
+          }}
+        />
+      </React.Suspense>
     );
   }
 
