@@ -196,6 +196,20 @@ export async function fetchProjectsFromDatabase(fallbackProjects = []) {
 }
 
 /**
+ * Helper to retrieve current admin session token from sessionStorage.
+ */
+export function getAuthHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('rajesh_portfolio_admin_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
+/**
  * Saves projects array directly to MongoDB Cloud Database (and IndexedDB).
  * Awaits confirmation so page refresh cannot interrupt the database write.
  */
@@ -208,7 +222,7 @@ export async function persistProjects(projectsArray) {
   try {
     const res = await fetch('/api/content?type=projects', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ type: 'projects', data: projectsArray }),
     });
     if (res.ok) {
@@ -244,7 +258,7 @@ export async function deleteProjectFromDatabase(projectId) {
   try {
     const res = await fetch(`/api/content?type=projects&id=${encodeURIComponent(projectId)}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id: projectId }),
     });
     if (res.ok) {
@@ -265,7 +279,7 @@ export async function deleteProjectFromDatabase(projectId) {
     try {
       await fetch('/api/content?type=projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ type: 'projects', data: filtered }),
       });
     } catch (e) {}
@@ -331,7 +345,7 @@ export async function persistContentToDatabase(type, itemsArray) {
   try {
     const res = await fetch('/api/content', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ type, data: itemsArray }),
     });
     if (res.ok) {
@@ -362,7 +376,7 @@ export async function deleteContentItemFromDatabase(type, itemId) {
   try {
     const res = await fetch(`/api/content?type=${encodeURIComponent(type)}&id=${encodeURIComponent(itemId)}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id: itemId }),
     });
     if (res.ok) {
@@ -382,7 +396,7 @@ export async function deleteContentItemFromDatabase(type, itemId) {
     try {
       await fetch('/api/content', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ type, data: filtered }),
       });
     } catch (e) {}
@@ -405,7 +419,7 @@ export async function deleteMessageFromDatabase(messageId) {
   try {
     const res = await fetch(`/api/contact?id=${encodeURIComponent(messageId)}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id: messageId }),
     });
     if (res.ok) {
@@ -440,7 +454,7 @@ export async function fetchMessagesFromDatabase() {
   try {
     const res = await fetch('/api/contact', {
       cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
+      headers: getAuthHeaders(),
     });
     if (res.ok) {
       const data = await res.json();

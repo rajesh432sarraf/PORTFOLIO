@@ -1,12 +1,9 @@
-/**
- * Vercel Serverless Function: /api/content
- * Handles both GET (fetch content) and POST (save content) using MongoDB Atlas.
- */
+import { verifyToken } from './_auth.js';
 
 export default async function handler(req, res) {
   const type = req.query?.type || req.body?.type || 'projects';
 
-  // Handle GET request to retrieve dynamic content
+  // Handle GET request to retrieve dynamic content (Public read-only)
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
@@ -34,8 +31,13 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, [type]: [], source: 'fallback' });
   }
 
-  // Handle DELETE request to delete a specific item by ID from MongoDB
+  // Handle DELETE request to delete a specific item by ID from MongoDB (Protected)
   if (req.method === 'DELETE') {
+    const auth = verifyToken(req);
+    if (!auth) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Master administrator token required to delete content.' });
+    }
+
     let body = req.body;
     if (typeof body === 'string') {
       try {
@@ -79,8 +81,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, message: 'Deleted locally.' });
   }
 
-  // Handle POST request to save/update dynamic content
+  // Handle POST request to save/update dynamic content (Protected)
   if (req.method === 'POST') {
+    const auth = verifyToken(req);
+    if (!auth) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Master administrator token required to modify content.' });
+    }
     let body = req.body;
     if (typeof body === 'string') {
       try {

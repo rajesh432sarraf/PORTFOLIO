@@ -1,11 +1,13 @@
-/**
- * Vercel Serverless Function: POST /api/contact
- * Handles contact form submissions securely without exposing database or email credentials to client.
- */
+import { verifyToken } from './_auth.js';
 
 export default async function handler(req, res) {
-  // Handle GET request to fetch messages (for Admin CMS)
+  // Handle GET request to fetch messages (Protected: Master Admin Only)
   if (req.method === 'GET') {
+    const auth = verifyToken(req);
+    if (!auth) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Master administrator token required to access messages.' });
+    }
+
     if (process.env.MONGODB_URI) {
       try {
         const { MongoClient } = await import('mongodb');
@@ -35,8 +37,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, messages: [] });
   }
 
-  // Handle DELETE request to delete a contact submission by ID from MongoDB
+  // Handle DELETE request to delete a contact submission by ID from MongoDB (Protected: Master Admin Only)
   if (req.method === 'DELETE') {
+    const auth = verifyToken(req);
+    if (!auth) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Master administrator token required to delete messages.' });
+    }
     let body = req.body;
     if (typeof body === 'string') {
       try {

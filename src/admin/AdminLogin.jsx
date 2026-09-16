@@ -8,56 +8,47 @@ export function AdminLogin({ onLoginSuccess }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Single authorized master owner definition
-  const getAuthorizedEmail = () => {
-    return (
-      localStorage.getItem('rajesh_portfolio_owner_email') ||
-      import.meta.env.VITE_ADMIN_EMAIL ||
-      'sarrafrajesh432@gmail.com'
-    ).toLowerCase().trim();
-  };
-
-  const getExpectedPassword = () => {
-    return (
-      localStorage.getItem('rajesh_portfolio_master_password') ||
-      import.meta.env.VITE_ADMIN_PASSWORD ||
-      'QWER4321'
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const cleanInputEmail = email.toLowerCase().trim();
-      const expectedEmail = getAuthorizedEmail();
-      const expectedPassword = getExpectedPassword();
+    const cleanInputEmail = email.toLowerCase().trim();
+    const cleanInputPassword = String(password).trim();
 
-      // Check 1: Must match the single authorized owner email
-      if (cleanInputEmail !== expectedEmail) {
-        setError(
-          'Access Denied: Only the portfolio owner (Rajesh Kumar) is authorized to access this CMS. Public visitors have explore-only permissions.'
-        );
+    try {
+      // 1. Authenticate against Serverless /api/login endpoint
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanInputEmail, password: cleanInputPassword }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.token) {
+          sessionStorage.setItem('rajesh_portfolio_admin_token', data.token);
+          sessionStorage.setItem('rajesh_portfolio_admin_email', cleanInputEmail);
+          setLoading(false);
+          if (onLoginSuccess) onLoginSuccess();
+          else window.location.pathname = '/admin';
+          return;
+        }
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || 'Access Denied: Invalid administrator credentials.');
         setLoading(false);
         return;
       }
-
-      // Check 2: Must match the master password (QWER4321 or custom saved password)
-      if (password !== expectedPassword && password !== 'QWER4321') {
-        setError('Incorrect password. Access denied.');
-        setLoading(false);
-        return;
-      }
-
-      // Authenticate session for the single owner
-      sessionStorage.setItem('rajesh_portfolio_admin_token', 'auth_session_active');
-      sessionStorage.setItem('rajesh_portfolio_admin_email', expectedEmail);
-      if (onLoginSuccess) onLoginSuccess();
-      else window.location.pathname = '/admin';
+    } catch (netErr) {
+      console.warn('Authentication error:', netErr);
+      setError('Authentication server error. Please check your network connection.');
       setLoading(false);
-    }, 500);
+      return;
+    }
+
+    setError('Access Denied: Invalid administrator credentials.');
+    setLoading(false);
   };
 
   return (
