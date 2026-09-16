@@ -16,34 +16,34 @@ export function ProjectCard({ project, index, totalCards }) {
         zIndex: index + 10,
         marginBottom: isLast ? '60px' : '400px',
       }}
-      className="sticky w-full max-w-7xl mx-auto rounded-[28px] sm:rounded-[36px] md:rounded-[44px] bg-[#0E0E0E] border border-white/20 p-6 sm:p-8 md:p-10 shadow-[0_-25px_50px_rgba(0,0,0,0.95),0_30px_70px_rgba(0,0,0,0.9)] transition-all duration-300"
+      className="sticky w-full max-w-7xl mx-auto rounded-[24px] sm:rounded-[36px] md:rounded-[44px] bg-[#0E0E0E] border border-white/20 p-5 sm:p-8 md:p-10 shadow-[0_-25px_50px_rgba(0,0,0,0.95),0_30px_70px_rgba(0,0,0,0.9)] transition-all duration-300"
     >
       {/* TOP HEADER ROW: 01 + CATEGORY/TITLE + LIVE PROJECT BUTTON */}
-      <div className="flex items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
-        <div className="flex items-center gap-4 sm:gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-white/[0.08]">
+        <div className="flex items-start sm:items-center gap-3.5 sm:gap-6 min-w-0 flex-1">
           {/* Big Number (01, 02, etc.) */}
-          <span className="font-kanit font-black text-4xl sm:text-5xl md:text-6xl text-white tracking-tight leading-none select-none">
+          <span className="font-kanit font-black text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-none select-none shrink-0">
             {project.number}
           </span>
 
           {/* Stacked Category / Type & Project Title */}
-          <div className="flex flex-col justify-center">
-            <span className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-widest text-white/50">
+          <div className="flex flex-col justify-center min-w-0 flex-1">
+            <span className="text-[10px] sm:text-xs font-mono font-semibold uppercase tracking-widest text-white/50 truncate">
               {project.category}
             </span>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-tight text-white font-kanit mt-0.5">
+            <h3 className="text-base sm:text-xl md:text-2xl font-bold uppercase tracking-tight text-white font-kanit mt-0.5 leading-snug break-words">
               {project.title}
             </h3>
           </div>
         </div>
 
         {/* Action Button: Live Project */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-start sm:justify-end gap-3 shrink-0">
           <a
             href={hasLive ? project.live : hasGithub ? project.github : '#contact'}
             target={hasLive || hasGithub ? '_blank' : '_self'}
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/40 hover:border-white bg-white/[0.04] hover:bg-white/10 text-xs sm:text-sm font-semibold tracking-widest text-white uppercase transition-all duration-200"
+            className="group inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/40 hover:border-white bg-white/[0.04] hover:bg-white/10 text-xs sm:text-sm font-semibold tracking-widest text-white uppercase transition-all duration-200"
             aria-label={`View ${project.title}`}
           >
             <span>LIVE PROJECT</span>
