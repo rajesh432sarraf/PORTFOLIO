@@ -66,7 +66,7 @@ export function Experience() {
         </div>
 
         {/* Vertical Editorial Timeline */}
-        <div className="relative pl-6 sm:pl-10 lg:pl-12 border-l border-white/[0.12] ml-2 sm:ml-4">
+        <div className="relative pl-6 sm:pl-10 lg:pl-12 border-l border-white/[0.12] ml-3 sm:ml-4">
           {experienceList.map((exp, idx) => (
             <motion.div
               key={`${exp.role}-${idx}`}

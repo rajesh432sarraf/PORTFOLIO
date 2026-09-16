@@ -65,7 +65,7 @@ export function About() {
             </div>
 
             {/* Terminal Command & JSON Output */}
-            <div className="p-4 sm:p-6 text-xs sm:text-[13px] leading-relaxed space-y-3">
+            <div className="p-4 sm:p-6 text-xs sm:text-[13px] leading-relaxed space-y-3 overflow-x-auto custom-scrollbar break-words">
               <div className="flex items-center gap-2 text-white/90">
                 <span className="text-emerald-400 font-bold">❯</span>
                 <span className="text-[#BBCCD7]">cat engineer_manifesto.json</span>

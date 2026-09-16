@@ -123,12 +123,12 @@ export function AdminDashboard({ onLogout }) {
       </header>
 
       <div className="flex-1 max-w-7xl w-full mx-auto p-5 sm:p-8 flex flex-col md:flex-row gap-8">
-        {/* Sidebar Navigation */}
-        <aside className="w-full md:w-64 flex flex-col gap-2">
+        {/* Navigation Tabs (Horizontal swipe on mobile, vertical sidebar on desktop) */}
+        <aside className="w-full md:w-64 flex flex-row md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar flex-shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'projects'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
@@ -141,7 +141,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('messages')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'messages'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
@@ -154,7 +154,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('experience')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'experience'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
@@ -167,7 +167,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('achievements')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'achievements'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
@@ -180,7 +180,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('certifications')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'certifications'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
@@ -193,7 +193,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'security'
                 ? 'bg-white text-black font-bold shadow-lg'
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'

@@ -57,7 +57,7 @@ export function ResumeModal({ isOpen, onClose }) {
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-white tracking-wide uppercase font-mono">
+                  <h3 className="text-xs sm:text-base font-bold text-white tracking-wide uppercase font-mono truncate max-w-[110px] sm:max-w-xs">
                     Rajesh_Kumar_Resume.pdf
                   </h3>
                   <p className="text-xs text-[#D7E2EA]/50 hidden sm:block">
@@ -67,15 +67,16 @@ export function ResumeModal({ isOpen, onClose }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 {/* Download PDF Button */}
                 <a
                   href={resumeUrl}
                   download="Rajesh_Kumar_Resume.pdf"
-                  className="flex items-center gap-2 px-3.5 sm:px-5 py-2 rounded-full bg-white text-black font-semibold text-xs sm:text-sm tracking-wider uppercase hover:bg-neutral-200 transition-all shadow-lg active:scale-95"
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 rounded-full bg-white text-black font-semibold text-xs sm:text-sm tracking-wider uppercase hover:bg-neutral-200 transition-all shadow-lg active:scale-95"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>Download PDF</span>
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Download PDF</span>
+                  <span className="sm:hidden">Download</span>
                 </a>
 
                 {/* Open in New Tab Button */}
