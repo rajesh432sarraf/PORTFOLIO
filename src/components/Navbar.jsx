@@ -18,7 +18,6 @@ function GitHubIcon({ className }) {
 const NAV_ITEMS = [
   { label: 'About', href: '#about' },
   { label: 'Skills', href: '#skills' },
-  { label: 'Build', href: '#services' },
   { label: 'Projects', href: '#projects' },
   { label: 'Experience', href: '#experience' },
   { label: 'Achievements', href: '#achievements' },
@@ -106,9 +105,9 @@ export function Navbar() {
           </motion.a>
 
           {/* Right Aligned Navigation Group (Links + Action Buttons) */}
-          <div className="flex items-center gap-6 lg:gap-10 ml-auto">
-            {/* Desktop Navigation Links - Aligned Towards Right Side */}
-            <ul className="hidden md:flex items-center gap-6 lg:gap-8 text-sm lg:text-base uppercase tracking-widest font-medium text-[#D7E2EA]">
+          <div className="flex items-center gap-6 lg:gap-8 ml-auto">
+            {/* Desktop Navigation Links - Curated 6 Core Sections */}
+            <ul className="hidden md:flex items-center gap-5 lg:gap-7 text-xs sm:text-[13px] uppercase tracking-wider font-medium text-[#D7E2EA]">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeSection === item.href;
                 return (
@@ -118,14 +117,14 @@ export function Navbar() {
                       className={`relative py-1 transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#D7E2EA] ${
                         isActive
                           ? 'text-white font-semibold'
-                          : 'text-[#D7E2EA]/75 hover:text-white'
+                          : 'text-[#D7E2EA]/65 hover:text-white'
                       }`}
                     >
                       <span>{item.label}</span>
                       {isActive && (
                         <motion.span
                           layoutId="activeNavIndicator"
-                          className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#BBCCD7] rounded-full"
+                          className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-white via-[#E9D5FF] to-[#D946EF] rounded-full"
                           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                         />
                       )}
@@ -135,13 +134,13 @@ export function Navbar() {
               })}
             </ul>
 
-            {/* Right Action: Resume & GitHub Profile Buttons */}
-            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            {/* Right Action: Resume & Minimalist GitHub Icon Button */}
+            <div className="flex items-center gap-3 sm:gap-3.5 flex-shrink-0">
               <MagneticButton strength={0.25} className="hidden sm:block">
                 <button
                   type="button"
                   onClick={() => setIsResumeModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm uppercase tracking-widest font-medium rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/10 hover:border-white/40 transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs uppercase tracking-wider font-medium rounded-full border border-white/20 text-[#D7E2EA] hover:bg-white/10 hover:border-white/40 transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white cursor-pointer"
                   aria-label="View Resume"
                 >
                   <Eye className="w-3.5 h-3.5 text-purple-400" />
@@ -149,18 +148,19 @@ export function Navbar() {
                 </button>
               </MagneticButton>
 
-              {/* GitHub Developer Link */}
-              <a
-                href="https://github.com/rajeshsarraf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 text-xs uppercase tracking-wider font-mono text-white/70 hover:text-white border border-white/15 hover:border-white/40 rounded-full hover:bg-white/[0.06] transition-all"
-                title="GitHub Profile (rajeshsarraf)"
-                aria-label="GitHub Profile"
-              >
-                <GitHubIcon className="w-3.5 h-3.5 text-white/80" />
-                <span>GitHub</span>
-              </a>
+              {/* Minimalist GitHub Icon Button */}
+              <MagneticButton strength={0.25} className="hidden sm:block">
+                <a
+                  href="https://github.com/rajeshsarraf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-8 h-8 rounded-full border border-white/15 hover:border-white/40 text-white/75 hover:text-white hover:bg-white/10 transition-all duration-200"
+                  title="GitHub Profile (rajeshsarraf)"
+                  aria-label="GitHub Profile"
+                >
+                  <GitHubIcon className="w-4 h-4" />
+                </a>
+              </MagneticButton>
 
               {/* Mobile Hamburger Toggle */}
               <button
