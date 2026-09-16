@@ -85,8 +85,14 @@ export function Experience() {
                     <span className="px-3 py-1 rounded-full text-xs font-mono uppercase tracking-wider bg-white/[0.04] border border-white/10 text-[#D7E2EA]/70">
                       {exp.period} • {exp.location}
                     </span>
-                    <span className="text-xs font-mono text-[#D7E2EA]/40 uppercase">
-                      INTERNSHIP
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono uppercase tracking-wider bg-white/[0.04] border border-white/10 text-[#BBCCD7] group-hover:border-purple-500/30 group-hover:text-purple-300 transition-colors">
+                      {exp.type || (
+                        exp.role?.toLowerCase().includes('hackathon') || exp.role?.toLowerCase().includes('hackthon') || exp.organization?.toLowerCase().includes('hackathon') || exp.organization?.toLowerCase().includes('hackthon')
+                          ? 'HACKATHON'
+                          : exp.role?.toLowerCase().includes('intern')
+                            ? 'INTERNSHIP'
+                            : 'EXPERIENCE'
+                      )}
                     </span>
                   </div>
 

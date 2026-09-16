@@ -40,7 +40,14 @@ export function ExperienceManager() {
   }, []);
 
   const handleOpenEdit = (exp, index) => {
-    setCurrentExp({ ...exp, _index: index });
+    const inferredType = exp.type || (
+      exp.role?.toLowerCase().includes('hackathon') || exp.role?.toLowerCase().includes('hackthon') || exp.organization?.toLowerCase().includes('hackathon') || exp.organization?.toLowerCase().includes('hackthon')
+        ? 'Hackathon'
+        : exp.role?.toLowerCase().includes('intern')
+          ? 'Internship'
+          : 'Experience'
+    );
+    setCurrentExp({ ...exp, type: inferredType, _index: index });
     setTechInput(Array.isArray(exp.technologies) ? exp.technologies.join(', ') : '');
     setIsEditing(true);
   };
@@ -51,7 +58,8 @@ export function ExperienceManager() {
       id: `exp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       role: '',
       organization: '',
-      period: '2025',
+      type: 'Internship',
+      period: '2026',
       location: 'Remote, India',
       description: '',
       technologies: ['React', 'JavaScript', 'Tailwind CSS'],
@@ -83,6 +91,7 @@ export function ExperienceManager() {
       id: currentExp.id || `exp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       role: currentExp.role.trim(),
       organization: currentExp.organization.trim(),
+      type: (currentExp.type || '').trim() || 'Experience',
       period: currentExp.period.trim(),
       location: currentExp.location.trim() || 'Remote',
       description: currentExp.description.trim(),
@@ -176,6 +185,7 @@ export function ExperienceManager() {
                 <tr className="border-b border-white/10 text-white/40 uppercase font-mono tracking-wider">
                   <th className="py-3.5 px-4 font-normal">#</th>
                   <th className="py-3.5 px-4 font-normal">Role & Title</th>
+                  <th className="py-3.5 px-4 font-normal">Type</th>
                   <th className="py-3.5 px-4 font-normal">Organization</th>
                   <th className="py-3.5 px-4 font-normal">Period</th>
                   <th className="py-3.5 px-4 font-normal">Location</th>
@@ -192,6 +202,17 @@ export function ExperienceManager() {
                     <td className="py-4 px-4 font-medium text-white">
                       <span className="font-bold tracking-tight uppercase font-kanit text-sm">
                         {exp.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] uppercase font-mono bg-purple-500/10 text-purple-300 border border-purple-500/20 font-semibold">
+                        {exp.type || (
+                          exp.role?.toLowerCase().includes('hackathon') || exp.role?.toLowerCase().includes('hackthon') || exp.organization?.toLowerCase().includes('hackathon') || exp.organization?.toLowerCase().includes('hackthon')
+                            ? 'Hackathon'
+                            : exp.role?.toLowerCase().includes('intern')
+                              ? 'Internship'
+                              : 'Experience'
+                        )}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-purple-400 uppercase font-semibold">
@@ -318,6 +339,45 @@ export function ExperienceManager() {
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
                   />
                 </div>
+              </div>
+
+              {/* Experience Type / Category Selection */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono uppercase text-white/80 font-bold block">
+                    Experience Type / Category *
+                  </label>
+                  <span className="text-[11px] font-mono text-purple-400">
+                    Displayed on Portfolio badge
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Internship', 'Hackathon', 'Full-Time', 'Part-Time', 'Freelance', 'Research', 'Open Source', 'Apprenticeship', 'Competition'].map((preset) => {
+                    const isSelected = currentExp.type?.toLowerCase() === preset.toLowerCase();
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setCurrentExp({ ...currentExp, type: preset })}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-purple-600 text-white font-bold shadow-[0_0_12px_rgba(168,85,247,0.4)] border border-purple-400'
+                            : 'bg-white/[0.04] text-white/70 hover:text-white border border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        {preset}
+                      </button>
+                    );
+                  })}
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Or enter custom category (e.g. Hackathon, Fellowship, Mentorship...)"
+                  value={currentExp.type || ''}
+                  onChange={(e) => setCurrentExp({ ...currentExp, type: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
