@@ -91,58 +91,17 @@ export function Navbar() {
           {/* Brand Logo / Identity - Extreme Left */}
           <motion.a
             href="#"
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="group flex items-center gap-3 sm:gap-3.5 flex-shrink-0 select-none cursor-pointer"
+            className="group relative flex flex-col items-start flex-shrink-0 select-none cursor-pointer py-1"
             aria-label="Rajesh Kumar Home"
           >
-            {/* Glass Squircle Monogram Container */}
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-white/[0.12] via-white/[0.04] to-transparent border border-white/15 p-[1px] shadow-lg shadow-black/30 group-hover:border-emerald-400/50 group-hover:shadow-[0_0_20px_rgba(52,211,153,0.25)] group-hover:rotate-[-3deg] transition-all duration-300">
-              <div className="w-full h-full rounded-[11px] bg-[#090D0F]/90 flex items-center justify-center relative overflow-hidden backdrop-blur-md">
-                {/* Subtle Sheen Sweep on Hover */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
-                
-                {/* Monogram Text */}
-                <span className="font-mono font-bold text-xs sm:text-sm tracking-tighter text-white group-hover:text-emerald-300 transition-colors">
-                  &lt;RK/&gt;
-                </span>
+            <span className="font-kanit font-black text-lg sm:text-xl lg:text-2xl tracking-wider group-hover:tracking-[0.13em] uppercase bg-gradient-to-r from-white via-[#EAEFF4] to-[#BBCCD7] group-hover:from-white group-hover:via-[#E9D5FF] group-hover:to-[#D946EF] bg-clip-text text-transparent drop-shadow-sm group-hover:drop-shadow-[0_0_16px_rgba(192,132,252,0.45)] transition-all duration-300 ease-out">
+              RAJESH KUMAR
+            </span>
 
-                {/* Corner Status Pulse */}
-                <span className="absolute top-1 right-1 flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
-                </span>
-              </div>
-            </div>
-
-            {/* Typographic Identity: Name & Role */}
-            <div className="flex flex-col text-left">
-              <span className="font-kanit font-black tracking-wider text-base sm:text-lg lg:text-xl text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-[#D7E2EA] group-hover:to-emerald-300 transition-all duration-300 leading-tight">
-                RAJESH KUMAR
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.20em] uppercase text-white/40 group-hover:text-emerald-400/80 transition-colors duration-300 leading-tight pt-0.5">
-                Full-Stack Engineer
-              </span>
-            </div>
-
-            {/* Interactive Availability Pill (Desktop) */}
-            <div className="hidden xl:flex items-center pl-2">
-              <div className="relative overflow-hidden px-3 py-1 rounded-full bg-emerald-500/[0.08] border border-emerald-500/20 group-hover:border-emerald-400/40 group-hover:bg-emerald-500/15 group-hover:shadow-[0_0_15px_rgba(52,211,153,0.2)] transition-all duration-300 flex items-center gap-2">
-                <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-                </span>
-                
-                {/* Dynamic Text with Hover Morph */}
-                <div className="relative h-3.5 overflow-hidden">
-                  <span className="block font-mono text-[10px] uppercase tracking-wider text-emerald-400/90 font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                    Open for Roles
-                  </span>
-                  <span className="block font-mono text-[10px] uppercase tracking-wider text-emerald-300 font-semibold transition-transform duration-300 group-hover:-translate-y-full">
-                    Ready to Build ⚡
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Precision Kinetic Glowing Underline */}
+            <span className="absolute -bottom-0.5 left-0 w-0 h-[2px] rounded-full bg-gradient-to-r from-white via-[#BBCCD7] to-[#C084FC] opacity-0 group-hover:w-full group-hover:opacity-100 transition-all duration-300 ease-out shadow-[0_0_8px_rgba(192,132,252,0.6)]" />
           </motion.a>
 
           {/* Right Aligned Navigation Group (Links + Action Buttons) */}
