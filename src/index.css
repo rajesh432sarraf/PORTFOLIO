@@ -42,6 +42,26 @@ html.lenis body {
   pointer-events: none;
 }
 
+/* Ultra-Smooth 90Hz/120Hz High-Refresh Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0C0C0C;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(215, 226, 234, 0.2);
+  border-radius: 9999px;
+  border: 2px solid #0C0C0C;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(215, 226, 234, 0.45);
+}
+
 /* Continuous Multi-Hue Liquid Gradient Flow (Never Monocolor / Always Mixed) */
 @keyframes mixedLiquidFlow {
   0% {
