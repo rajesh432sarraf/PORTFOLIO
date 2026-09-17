@@ -105,11 +105,29 @@ export function ResumeModal({ isOpen, onClose }) {
 
             {/* Viewer Content */}
             <div className="relative flex-1 w-full bg-[#080808] p-2 sm:p-4 overflow-hidden">
-              <iframe
-                src={`${resumeUrl}#toolbar=1`}
+              <object
+                data={`${resumeUrl}#toolbar=1&view=FitH`}
+                type="application/pdf"
                 className="w-full h-full rounded-xl border border-white/5 bg-neutral-900"
                 title="Rajesh Kumar Resume PDF"
-              />
+              >
+                <iframe
+                  src={`${resumeUrl}#toolbar=1&view=FitH`}
+                  className="w-full h-full rounded-xl border border-white/5 bg-neutral-900"
+                  title="Rajesh Kumar Resume PDF"
+                >
+                  <div className="flex flex-col items-center justify-center h-full p-6 text-center text-[#D7E2EA]">
+                    <p className="mb-4 text-sm text-[#D7E2EA]/70">PDF preview is not supported directly in this browser.</p>
+                    <a
+                      href={resumeUrl}
+                      download="Rajesh_Kumar_Resume.pdf"
+                      className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm tracking-wide uppercase hover:bg-neutral-200 transition-all"
+                    >
+                      Download Resume PDF
+                    </a>
+                  </div>
+                </iframe>
+              </object>
             </div>
           </motion.div>
         </div>
