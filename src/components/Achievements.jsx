@@ -115,11 +115,14 @@ export function Achievements() {
     };
   }, []);
 
-  // Mouse Drag-to-Scroll for desktop mouse users
+  // Mouse Drag-to-Scroll for DESKTOP mouse users only
   const dragInfoRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasMoved: false });
 
-  const handleMouseDown = (e) => {
-    if (e.button !== 0) return; // Only left click
+  const handlePointerDown = (e) => {
+    // If it's a touch gesture on mobile/tablet, NEVER intercept! Let native mobile touch scroll freely!
+    if (e.pointerType === 'touch') return;
+    if (e.button !== 0) return; // Only left mouse click
+
     const container = scrollContainerRef.current;
     if (!container) return;
 
@@ -131,12 +134,12 @@ export function Achievements() {
     };
   };
 
-  const handleMouseMove = (e) => {
+  const handlePointerMove = (e) => {
+    if (e.pointerType === 'touch') return;
     if (!dragInfoRef.current.isDown) return;
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    e.preventDefault();
     const x = e.pageX - container.offsetLeft;
     const walk = (x - dragInfoRef.current.startX) * 1.3;
     if (Math.abs(walk) > 4) {
@@ -145,7 +148,8 @@ export function Achievements() {
     }
   };
 
-  const handleMouseUpOrLeave = () => {
+  const handlePointerUpOrLeave = (e) => {
+    if (e.pointerType === 'touch') return;
     dragInfoRef.current.isDown = false;
     setTimeout(() => {
       dragInfoRef.current.hasMoved = false;
@@ -270,16 +274,17 @@ export function Achievements() {
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseLeave={handleMouseUpOrLeave}
-          className="flex gap-5 sm:gap-6 overflow-x-auto pb-6 pt-1 px-1 custom-scrollbar snap-x snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUpOrLeave}
+          onPointerLeave={handlePointerUpOrLeave}
+          className="flex gap-5 sm:gap-6 overflow-x-auto pb-6 pt-1 px-1 custom-scrollbar snap-x snap-proximity cursor-grab active:cursor-grabbing"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
+            touchAction: 'pan-x pan-y',
+            overscrollBehaviorX: 'auto',
           }}
         >
           {achievementList.map((item, idx) => {
@@ -296,7 +301,8 @@ export function Achievements() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ duration: 0.6, delay: Math.min(idx * 0.08, 0.4) }}
-                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-purple-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(118,33,176,0.25)] snap-start cursor-pointer touch-manipulation"
+                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-purple-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(118,33,176,0.25)] snap-start cursor-pointer"
+                style={{ touchAction: 'pan-x pan-y' }}
                 role="button"
                 tabIndex={0}
                 aria-label={`View details for ${item.title}`}
@@ -310,7 +316,8 @@ export function Achievements() {
                     <img
                       src={item.image}
                       alt={`${item.title} — ${item.event}`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      draggable={false}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none select-none"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E0E] via-transparent to-black/30" />
