@@ -151,11 +151,11 @@ export function Navbar() {
               {/* Minimalist GitHub Icon Button */}
               <MagneticButton strength={0.25} className="hidden sm:block">
                 <a
-                  href="https://github.com/rajeshsarraf"
+                  href="https://github.com/rajesh432sarraf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-8 h-8 rounded-full border border-white/15 hover:border-white/40 text-white/75 hover:text-white hover:bg-white/10 transition-all duration-200"
-                  title="GitHub Profile (rajeshsarraf)"
+                  title="GitHub Profile (rajesh432sarraf)"
                   aria-label="GitHub Profile"
                 >
                   <GitHubIcon className="w-4 h-4" />
@@ -224,7 +224,7 @@ export function Navbar() {
               </button>
 
               <a
-                href="https://github.com/rajeshsarraf"
+                href="https://github.com/rajesh432sarraf"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}

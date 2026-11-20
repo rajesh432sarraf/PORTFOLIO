@@ -40,7 +40,7 @@ export function Footer() {
         {/* Right: Key Essentials & Outbound Profiles */}
         <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6 text-[#D7E2EA]/60">
           <a
-            href="https://github.com/rajeshsarraf"
+            href="https://github.com/rajesh432sarraf"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-white transition-colors inline-flex items-center gap-1"

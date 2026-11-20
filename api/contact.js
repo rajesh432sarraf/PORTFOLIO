@@ -1,5 +1,8 @@
 import { verifyToken } from './_auth.js';
 
+const isMongoConfigured = (uri) =>
+  Boolean(uri && uri.trim() && !uri.includes('<cluster>') && !uri.includes('<username>') && uri.startsWith('mongodb'));
+
 export default async function handler(req, res) {
   // Handle GET request to fetch messages (Protected: Master Admin Only)
   if (req.method === 'GET') {
@@ -8,7 +11,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ success: false, error: 'Unauthorized: Master administrator token required to access messages.' });
     }
 
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);
@@ -56,7 +59,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message id is required for deletion.' });
     }
 
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient, ObjectId } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);
@@ -140,7 +143,7 @@ export default async function handler(req, res) {
     }
 
     // 4. MongoDB Persistence (if configured via MONGODB_URI)
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);

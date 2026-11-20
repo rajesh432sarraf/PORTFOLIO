@@ -5,9 +5,9 @@
 export const profiles = [
   {
     platform: "GITHUB",
-    handle: "@rajeshsarraf",
+    handle: "@rajesh432sarraf",
     description: "Explore my open-source repositories, architectural experiments, and active projects.",
-    url: "https://github.com/rajeshsarraf",
+    url: "https://github.com/rajesh432sarraf",
     badge: "Code & Projects",
   },
   {

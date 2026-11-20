@@ -1,5 +1,8 @@
 import { verifyToken } from './_auth.js';
 
+const isMongoConfigured = (uri) =>
+  Boolean(uri && uri.trim() && !uri.includes('<cluster>') && !uri.includes('<username>') && uri.startsWith('mongodb'));
+
 export default async function handler(req, res) {
   const type = req.query?.type || req.body?.type || 'projects';
 
@@ -7,7 +10,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);
@@ -51,7 +54,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Item id is required for deletion.' });
     }
 
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient, ObjectId } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);
@@ -101,7 +104,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Valid data array is required.' });
     }
 
-    if (process.env.MONGODB_URI) {
+    if (isMongoConfigured(process.env.MONGODB_URI)) {
       try {
         const { MongoClient } = await import('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI);
