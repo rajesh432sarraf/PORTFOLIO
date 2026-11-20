@@ -8,7 +8,7 @@ import {
   ExternalLink,
   Eye,
   RefreshCw,
-  RotateCcw,
+  Trash2,
   Download,
 } from 'lucide-react';
 import {
@@ -16,8 +16,6 @@ import {
   persistContentToDatabase,
 } from '../services/storageService.js';
 
-const DEFAULT_RESUME_URL = '/resume/Rajesh_Kumar_Resume.pdf';
-const DEFAULT_RESUME_NAME = 'Rajesh_Kumar_Resume.pdf';
 const MAX_FILE_SIZE_MB = 3.5;
 
 export function ResumeManager() {
@@ -175,9 +173,9 @@ export function ResumeManager() {
     }
   };
 
-  // Reset to default static resume
-  const handleResetToDefault = async () => {
-    if (!window.confirm('Are you sure you want to revert to the default resume in your project code?')) {
+  // Remove / delete current resume
+  const handleDeleteResume = async () => {
+    if (!window.confirm('Are you sure you want to delete the active resume from your portfolio?')) {
       return;
     }
 
@@ -192,19 +190,18 @@ export function ResumeManager() {
       setExternalUrl('');
       setFileName('');
       setMsg({
-        text: 'Reverted to default project resume (/resume/Rajesh_Kumar_Resume.pdf).',
+        text: 'Resume deleted successfully from your portfolio and database.',
         type: 'success',
       });
     } catch (err) {
-      setMsg({ text: `Reset failed: ${err.message}`, type: 'error' });
+      setMsg({ text: `Delete failed: ${err.message}`, type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
-  const activeUrl =
-    currentResume?.fileData || currentResume?.fileUrl || DEFAULT_RESUME_URL;
-  const isCustomActive = Boolean(currentResume && (currentResume.fileData || currentResume.fileUrl));
+  const activeUrl = currentResume?.fileData || currentResume?.fileUrl || '';
+  const hasActiveResume = Boolean(activeUrl && activeUrl.trim().length > 0);
 
   return (
     <div className="space-y-8">
@@ -220,18 +217,20 @@ export function ResumeManager() {
         </div>
 
         {/* Live Preview Button */}
-        <div className="flex items-center gap-3">
-          <a
-            href={activeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs font-mono text-white hover:bg-white/10 hover:border-white/30 transition-all"
-          >
-            <Eye className="w-3.5 h-3.5 text-purple-400" />
-            <span>Preview Active Resume</span>
-            <ExternalLink className="w-3 h-3 opacity-60" />
-          </a>
-        </div>
+        {hasActiveResume && (
+          <div className="flex items-center gap-3">
+            <a
+              href={activeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs font-mono text-white hover:bg-white/10 hover:border-white/30 transition-all"
+            >
+              <Eye className="w-3.5 h-3.5 text-purple-400" />
+              <span>Preview Active Resume</span>
+              <ExternalLink className="w-3 h-3 opacity-60" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Alert Messages */}
@@ -262,22 +261,22 @@ export function ResumeManager() {
             <div>
               <div className="flex items-center gap-2.5 mb-1">
                 <span className="text-sm font-bold text-white font-mono">
-                  {currentResume?.fileName || DEFAULT_RESUME_NAME}
+                  {hasActiveResume ? (currentResume?.fileName || 'Rajesh_Kumar_Resume.pdf') : 'No Active Resume'}
                 </span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider ${
-                    isCustomActive
+                    hasActiveResume
                       ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                      : 'bg-white/10 text-white/60'
+                      : 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
                   }`}
                 >
-                  {isCustomActive ? 'Custom CMS Upload' : 'Default Project File'}
+                  {hasActiveResume ? 'Live on Portfolio' : 'Not Uploaded Yet'}
                 </span>
               </div>
               <p className="text-xs text-white/50 font-mono">
-                {currentResume?.updatedAt
+                {hasActiveResume
                   ? `Last updated: ${new Date(currentResume.updatedAt).toLocaleString()}`
-                  : 'Using default portfolio PDF file from repository.'}
+                  : 'Upload your latest resume PDF below to make it live for recruiters.'}
               </p>
               {currentResume?.fileSize && (
                 <p className="text-[11px] text-white/40 font-mono mt-0.5">
@@ -287,16 +286,16 @@ export function ResumeManager() {
             </div>
           </div>
 
-          {isCustomActive && (
+          {hasActiveResume && (
             <button
               type="button"
-              onClick={handleResetToDefault}
+              onClick={handleDeleteResume}
               disabled={saving}
-              className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-white/60 hover:text-rose-300 hover:border-rose-500/30 transition-colors flex items-center gap-1.5 shrink-0"
-              title="Reset to default resume"
+              className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-white/60 hover:text-rose-300 hover:border-rose-500/30 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+              title="Delete active resume"
             >
-              <RotateCcw className="w-3 h-3" />
-              <span className="hidden sm:inline">Reset to Default</span>
+              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+              <span className="hidden sm:inline">Delete Resume</span>
             </button>
           )}
         </div>

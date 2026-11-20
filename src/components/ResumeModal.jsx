@@ -1,28 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, ExternalLink, FileText } from 'lucide-react';
+import { X, Download, ExternalLink, FileText, Send } from 'lucide-react';
 import { fetchContentFromDatabase } from '../services/storageService.js';
 
-const DEFAULT_RESUME_URL = '/resume/Rajesh_Kumar_Resume.pdf';
-const DEFAULT_RESUME_NAME = 'Rajesh_Kumar_Resume.pdf';
-
 export function ResumeModal({ isOpen, onClose }) {
-  const [resumeUrl, setResumeUrl] = useState(DEFAULT_RESUME_URL);
-  const [resumeName, setResumeName] = useState(DEFAULT_RESUME_NAME);
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [resumeName, setResumeName] = useState('Rajesh_Kumar_Resume.pdf');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadResume() {
+      setLoading(true);
       try {
         const items = await fetchContentFromDatabase('resume', []);
-        if (isMounted && items && items.length > 0) {
-          const current = items[0];
-          const active = current.fileData || current.fileUrl || DEFAULT_RESUME_URL;
-          setResumeUrl(active);
-          setResumeName(current.fileName || DEFAULT_RESUME_NAME);
+        if (isMounted) {
+          if (items && items.length > 0) {
+            const current = items[0];
+            const active = current.fileData || current.fileUrl || '';
+            setResumeUrl(active);
+            setResumeName(current.fileName || 'Rajesh_Kumar_Resume.pdf');
+          } else {
+            setResumeUrl('');
+          }
         }
-      } catch (err) {}
+      } catch (err) {
+        if (isMounted) setResumeUrl('');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     }
 
     loadResume();
@@ -57,6 +64,8 @@ export function ResumeModal({ isOpen, onClose }) {
     };
   }, [isOpen, onClose]);
 
+  const hasResume = Boolean(resumeUrl && resumeUrl.trim().length > 0);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -90,45 +99,49 @@ export function ResumeModal({ isOpen, onClose }) {
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-base font-bold text-white tracking-wide uppercase font-mono truncate max-w-[110px] sm:max-w-xs">
-                    {resumeName}
+                  <h3 className="text-xs sm:text-base font-bold text-white tracking-wide uppercase font-mono truncate max-w-[140px] sm:max-w-xs">
+                    {hasResume ? resumeName : 'Rajesh Kumar • Resume'}
                   </h3>
-                  <p className="text-xs text-[#D7E2EA]/50 hidden sm:block">
-                    Curriculum Vitae • Live Preview
+                  <p className="text-xs text-[#D7E2EA]/50 hidden sm:block font-mono">
+                    {hasResume ? 'Curriculum Vitae • Live Preview' : 'Curriculum Vitae'}
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                {/* Download PDF Button */}
-                <a
-                  href={resumeUrl}
-                  download={resumeName}
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 rounded-full bg-white text-black font-semibold text-xs sm:text-sm tracking-wider uppercase hover:bg-neutral-200 transition-all shadow-lg active:scale-95"
-                >
-                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Download PDF</span>
-                  <span className="sm:hidden">Download</span>
-                </a>
+                {hasResume && (
+                  <>
+                    {/* Download PDF Button */}
+                    <a
+                      href={resumeUrl}
+                      download={resumeName}
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 rounded-full bg-white text-black font-semibold text-xs sm:text-sm tracking-wider uppercase hover:bg-neutral-200 transition-all shadow-lg active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Download PDF</span>
+                      <span className="sm:hidden">Download</span>
+                    </a>
 
-                {/* Open in New Tab Button */}
-                <a
-                  href={resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/20 text-[#D7E2EA] text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
-                  title="Open PDF in new browser tab"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Open Tab</span>
-                </a>
+                    {/* Open in New Tab Button */}
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/20 text-[#D7E2EA] text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
+                      title="Open PDF in new browser tab"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Open Tab</span>
+                    </a>
+                  </>
+                )}
 
                 {/* Close Button */}
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-2 rounded-full border border-white/10 text-[#D7E2EA]/70 hover:text-white hover:bg-white/10 transition-colors ml-1"
+                  className="p-2 rounded-full border border-white/10 text-[#D7E2EA]/70 hover:text-white hover:bg-white/10 transition-colors ml-1 cursor-pointer"
                   aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
@@ -137,30 +150,57 @@ export function ResumeModal({ isOpen, onClose }) {
             </div>
 
             {/* Viewer Content */}
-            <div className="relative flex-1 w-full bg-[#080808] p-2 sm:p-4 overflow-hidden">
-              <object
-                data={`${resumeUrl}#toolbar=1&view=FitH`}
-                type="application/pdf"
-                className="w-full h-full rounded-xl border border-white/5 bg-neutral-900"
-                title="Rajesh Kumar Resume PDF"
-              >
-                <iframe
-                  src={`${resumeUrl}#toolbar=1&view=FitH`}
+            <div className="relative flex-1 w-full bg-[#080808] p-2 sm:p-4 overflow-hidden flex flex-col justify-center items-center">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center space-y-3 font-mono text-xs text-white/50 uppercase tracking-widest">
+                  <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                  <span>Loading Resume...</span>
+                </div>
+              ) : hasResume ? (
+                <object
+                  data={`${resumeUrl}#toolbar=1&view=FitH`}
+                  type="application/pdf"
                   className="w-full h-full rounded-xl border border-white/5 bg-neutral-900"
                   title="Rajesh Kumar Resume PDF"
                 >
-                  <div className="flex flex-col items-center justify-center h-full p-6 text-center text-[#D7E2EA]">
-                    <p className="mb-4 text-sm text-[#D7E2EA]/70">PDF preview is not supported directly in this browser.</p>
-                    <a
-                      href={resumeUrl}
-                      download="Rajesh_Kumar_Resume.pdf"
-                      className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm tracking-wide uppercase hover:bg-neutral-200 transition-all"
-                    >
-                      Download Resume PDF
-                    </a>
+                  <iframe
+                    src={`${resumeUrl}#toolbar=1&view=FitH`}
+                    className="w-full h-full rounded-xl border border-white/5 bg-neutral-900"
+                    title="Rajesh Kumar Resume PDF"
+                  >
+                    <div className="flex flex-col items-center justify-center h-full p-6 text-center text-[#D7E2EA]">
+                      <p className="mb-4 text-sm text-[#D7E2EA]/70">PDF preview is not supported directly in this browser.</p>
+                      <a
+                        href={resumeUrl}
+                        download={resumeName}
+                        className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm tracking-wide uppercase hover:bg-neutral-200 transition-all"
+                      >
+                        Download Resume PDF
+                      </a>
+                    </div>
+                  </iframe>
+                </object>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center text-[#D7E2EA] max-w-md mx-auto space-y-4">
+                  <div className="p-4 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                    <FileText className="w-8 h-8" />
                   </div>
-                </iframe>
-              </object>
+                  <h4 className="text-lg font-bold font-kanit uppercase tracking-wider text-white">
+                    Resume Updating
+                  </h4>
+                  <p className="text-xs text-[#D7E2EA]/60 leading-relaxed font-mono">
+                    The resume is currently being updated with latest projects and achievements. Please reach out directly or check back shortly.
+                  </p>
+                  <a
+                    href="#contact"
+                    onClick={onClose}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase hover:bg-neutral-200 transition-all font-mono"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Contact Rajesh</span>
+                  </a>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -170,3 +210,4 @@ export function ResumeModal({ isOpen, onClose }) {
 }
 
 export default ResumeModal;
+
