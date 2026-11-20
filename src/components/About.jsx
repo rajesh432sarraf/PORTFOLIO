@@ -35,7 +35,7 @@ export function About() {
         </FadeIn>
 
         {/* Scroll-driven character reveal paragraph */}
-        <div className="max-w-[560px] sm:max-w-[640px] lg:max-w-[680px] mb-8">
+        <div className="max-w-[560px] sm:max-w-[640px] lg:max-w-[680px] mb-12 sm:mb-16">
           <AnimatedText
             text={ABOUT_TEXT}
             className="text-[#D7E2EA] font-medium leading-relaxed"
@@ -44,61 +44,6 @@ export function About() {
             }}
           />
         </div>
-
-        {/* Authentic Interactive Developer Terminal */}
-        <FadeIn delay={0.15} y={24}>
-          <div className="w-full max-w-2xl my-8 rounded-2xl bg-[#090909] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden text-left font-mono">
-            {/* Terminal Window Header Bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border-b border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#FF5F56]/90 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-[#FFBD2E]/90 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-[#27C93F]/90 inline-block" />
-                <span className="ml-2 text-[11px] text-[#D7E2EA]/50 tracking-wide select-none">
-                  rajesh@dev-station: ~
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-emerald-400/90 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>git:(main)</span>
-              </div>
-            </div>
-
-            {/* Terminal Command & JSON Output */}
-            <div className="p-4 sm:p-6 text-xs sm:text-[13px] leading-relaxed space-y-3 overflow-x-auto custom-scrollbar break-words">
-              <div className="flex items-center gap-2 text-white/90">
-                <span className="text-emerald-400 font-bold">❯</span>
-                <span className="text-[#BBCCD7]">cat engineer_manifesto.json</span>
-              </div>
-
-              <div className="pl-4 border-l border-white/10 text-white/70 space-y-1 text-xs">
-                <p>
-                  <span className="text-purple-400">"engineer"</span>: <span className="text-amber-300">"Rajesh Kumar"</span>,
-                </p>
-                <p>
-                  <span className="text-purple-400">"role"</span>: <span className="text-amber-300">"Full-Stack Web &amp; Systems Developer"</span>,
-                </p>
-                <p>
-                  <span className="text-purple-400">"education"</span>: <span className="text-amber-300">"B.Tech Computer Science Core"</span>,
-                </p>
-                <p>
-                  <span className="text-purple-400">"architecture"</span>: <span className="text-emerald-300">["Clean Code", "REST APIs", "Modern React", "MongoDB Database"]</span>,
-                </p>
-                <p>
-                  <span className="text-purple-400">"mindset"</span>: <span className="text-amber-300">"Build production-grade digital products that solve real problems."</span>,
-                </p>
-                <p>
-                  <span className="text-purple-400">"status"</span>: <span className="text-emerald-400 font-semibold">"Ready for software engineering internships &amp; high-impact roles"</span>
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-emerald-400 font-bold">❯</span>
-                <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse" />
-              </div>
-            </div>
-          </div>
-        </FadeIn>
 
         {/* Contact CTA with MagneticButton */}
         <FadeIn delay={0.25} y={20}>
