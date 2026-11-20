@@ -5,6 +5,7 @@ import {
   Briefcase,
   Trophy,
   Award,
+  FileText,
   LogOut,
   ExternalLink,
   Shield,
@@ -20,6 +21,7 @@ import MessageManager from './MessageManager.jsx';
 import ExperienceManager from './ExperienceManager.jsx';
 import AchievementManager from './AchievementManager.jsx';
 import CertificateManager from './CertificateManager.jsx';
+import ResumeManager from './ResumeManager.jsx';
 
 export function AdminDashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('projects'); // 'projects' | 'messages' | 'experience' | 'achievements' | 'certifications' | 'security'
@@ -192,6 +194,19 @@ export function AdminDashboard({ onLogout }) {
 
           <button
             type="button"
+            onClick={() => setActiveTab('resume')}
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+              activeTab === 'resume'
+                ? 'bg-white text-black font-bold shadow-lg'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+            }`}
+          >
+            <FileText className="w-4 h-4 text-purple-400" />
+            <span>Resume (CV)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('security')}
             className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'security'
@@ -212,6 +227,7 @@ export function AdminDashboard({ onLogout }) {
           {activeTab === 'experience' && <ExperienceManager />}
           {activeTab === 'achievements' && <AchievementManager />}
           {activeTab === 'certifications' && <CertificateManager />}
+          {activeTab === 'resume' && <ResumeManager />}
 
           {activeTab === 'security' && (
             <div className="space-y-6">

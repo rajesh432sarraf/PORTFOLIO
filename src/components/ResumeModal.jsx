@@ -1,9 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, ExternalLink, FileText } from 'lucide-react';
+import { fetchContentFromDatabase } from '../services/storageService.js';
+
+const DEFAULT_RESUME_URL = '/resume/Rajesh_Kumar_Resume.pdf';
+const DEFAULT_RESUME_NAME = 'Rajesh_Kumar_Resume.pdf';
 
 export function ResumeModal({ isOpen, onClose }) {
-  const resumeUrl = '/resume/Rajesh_Kumar_Resume.pdf';
+  const [resumeUrl, setResumeUrl] = useState(DEFAULT_RESUME_URL);
+  const [resumeName, setResumeName] = useState(DEFAULT_RESUME_NAME);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadResume() {
+      try {
+        const items = await fetchContentFromDatabase('resume', []);
+        if (isMounted && items && items.length > 0) {
+          const current = items[0];
+          const active = current.fileData || current.fileUrl || DEFAULT_RESUME_URL;
+          setResumeUrl(active);
+          setResumeName(current.fileName || DEFAULT_RESUME_NAME);
+        }
+      } catch (err) {}
+    }
+
+    loadResume();
+
+    const handleUpdate = () => {
+      loadResume();
+    };
+
+    window.addEventListener('portfolio_data_updated', handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('portfolio_data_updated', handleUpdate);
+    };
+  }, []);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -58,7 +91,7 @@ export function ResumeModal({ isOpen, onClose }) {
                 </div>
                 <div>
                   <h3 className="text-xs sm:text-base font-bold text-white tracking-wide uppercase font-mono truncate max-w-[110px] sm:max-w-xs">
-                    Rajesh_Kumar_Resume.pdf
+                    {resumeName}
                   </h3>
                   <p className="text-xs text-[#D7E2EA]/50 hidden sm:block">
                     Curriculum Vitae • Live Preview
@@ -71,7 +104,7 @@ export function ResumeModal({ isOpen, onClose }) {
                 {/* Download PDF Button */}
                 <a
                   href={resumeUrl}
-                  download="Rajesh_Kumar_Resume.pdf"
+                  download={resumeName}
                   className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 rounded-full bg-white text-black font-semibold text-xs sm:text-sm tracking-wider uppercase hover:bg-neutral-200 transition-all shadow-lg active:scale-95"
                 >
                   <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
