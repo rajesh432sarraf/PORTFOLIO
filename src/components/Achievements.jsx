@@ -85,6 +85,73 @@ export function Achievements() {
     });
   };
 
+  // Prevent vertical mouse wheel from being trapped/converted into horizontal movement.
+  // When cursor is on this section and user scrolls up/down, scroll the page vertically!
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      // If user is scrolling vertically with the mouse wheel (without holding Shift)
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && !e.shiftKey) {
+        // Prevent the container from trapping the wheel and scrolling horizontally
+        e.preventDefault();
+
+        // Scroll the window vertically using Lenis natural inertia
+        if (window.__lenis) {
+          const currentTarget = window.__lenis.targetScroll ?? window.scrollY;
+          window.__lenis.scrollTo(currentTarget + e.deltaY, {
+            programmatic: false,
+          });
+        } else {
+          window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
+  // Mouse Drag-to-Scroll for desktop mouse users
+  const dragInfoRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasMoved: false });
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // Only left click
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    dragInfoRef.current = {
+      isDown: true,
+      startX: e.pageX - container.offsetLeft,
+      scrollLeft: container.scrollLeft,
+      hasMoved: false,
+    };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragInfoRef.current.isDown) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - dragInfoRef.current.startX) * 1.3;
+    if (Math.abs(walk) > 4) {
+      dragInfoRef.current.hasMoved = true;
+      container.scrollLeft = dragInfoRef.current.scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    dragInfoRef.current.isDown = false;
+    setTimeout(() => {
+      dragInfoRef.current.hasMoved = false;
+    }, 60);
+  };
+
   // Close lightbox on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -199,12 +266,15 @@ export function Achievements() {
           </FadeIn>
         </div>
 
-        {/* Space-Efficient Horizontal Carousel */}
+        {/* Space-Efficient Horizontal Carousel with Mouse Drag & Free Vertical Page Scroll */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          data-lenis-prevent="true"
-          className="flex gap-5 sm:gap-6 overflow-x-auto pb-6 pt-1 px-1 custom-scrollbar snap-x snap-mandatory scroll-smooth"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          className="flex gap-5 sm:gap-6 overflow-x-auto pb-6 pt-1 px-1 custom-scrollbar snap-x snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -218,7 +288,10 @@ export function Achievements() {
             return (
               <motion.div
                 key={item.id || item.title || idx}
-                onClick={() => setActiveCert(item)}
+                onClick={() => {
+                  if (dragInfoRef.current.hasMoved) return;
+                  setActiveCert(item);
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-20px' }}

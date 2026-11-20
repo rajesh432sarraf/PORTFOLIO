@@ -38,6 +38,9 @@ export function useLenis(enabled = true) {
     });
 
     lenisRef.current = lenis;
+    if (typeof window !== 'undefined') {
+      window.__lenis = lenis;
+    }
 
     let rafId;
     function raf(time) {
@@ -51,6 +54,9 @@ export function useLenis(enabled = true) {
       if (rafId) cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
+      if (typeof window !== 'undefined') {
+        window.__lenis = null;
+      }
     };
   }, [enabled]);
 
