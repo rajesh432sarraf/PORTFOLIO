@@ -21,6 +21,11 @@ export function useLenis(enabled = true) {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
+    // On mobile devices (< 768px), disable Lenis to preserve native 120Hz gesture scrolling
+    // and prevent touch hijacking on horizontal sliders and swipe-up gestures.
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
     const lenis = new Lenis({
       duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -28,7 +33,7 @@ export function useLenis(enabled = true) {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.8,
+      touchMultiplier: 0,
       infinite: false,
     });
 

@@ -203,8 +203,14 @@ export function Achievements() {
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
+          data-lenis-prevent="true"
           className="flex gap-5 sm:gap-6 overflow-x-auto pb-6 pt-1 px-1 custom-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+          }}
         >
           {achievementList.map((item, idx) => {
             const tier = getBadgeStyle(item.highlight, item.title);
@@ -217,7 +223,7 @@ export function Achievements() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ duration: 0.6, delay: Math.min(idx * 0.08, 0.4) }}
-                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-purple-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(118,33,176,0.25)] snap-start cursor-pointer select-none"
+                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-purple-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(118,33,176,0.25)] snap-start cursor-pointer touch-manipulation"
                 role="button"
                 tabIndex={0}
                 aria-label={`View details for ${item.title}`}
