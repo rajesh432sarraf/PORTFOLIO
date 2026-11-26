@@ -93,7 +93,7 @@ export function AdminDashboard({ onLogout }) {
       {/* Top Admin Header Bar */}
       <header className="w-full bg-[#0C0C0C] border-b border-white/10 px-6 py-4 flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 text-emerald-400">
+          <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 text-white/70">
             <Shield className="w-4 h-4" />
           </div>
           <div>
@@ -229,7 +229,7 @@ export function AdminDashboard({ onLogout }) {
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
-            <Shield className="w-4 h-4 text-emerald-400" />
+            <Shield className="w-4 h-4 text-purple-400" />
             <span>Security & Access</span>
           </button>
         </aside>
@@ -255,7 +255,7 @@ export function AdminDashboard({ onLogout }) {
                 {/* Option 1: Update Authorized Gmail */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <Mail className="w-4 h-4 text-emerald-400" />
+                    <Mail className="w-4 h-4 text-purple-400" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
                       Change Authorized Owner Gmail
                     </h3>
@@ -277,7 +277,7 @@ export function AdminDashboard({ onLogout }) {
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="yourname@gmail.com"
-                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-emerald-400 font-mono transition-colors"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
                       />
                     </div>
 
@@ -285,7 +285,7 @@ export function AdminDashboard({ onLogout }) {
                       <div
                         className={`flex items-center gap-2 p-3 rounded-xl text-xs font-mono border ${
                           emailMsg.type === 'success'
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                            ? 'bg-purple-500/10 border-purple-500/20 text-purple-300'
                             : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
                         }`}
                       >
@@ -300,7 +300,7 @@ export function AdminDashboard({ onLogout }) {
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-emerald-400 text-black text-xs font-mono font-bold uppercase tracking-wider hover:bg-emerald-300 transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-mono font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
                     >
                       Save New Gmail
                     </button>
@@ -310,7 +310,7 @@ export function AdminDashboard({ onLogout }) {
                 {/* Option 2: Change Master Password */}
                 <div className="border-t border-white/10 pt-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Key className="w-4 h-4 text-emerald-400" />
+                    <Key className="w-4 h-4 text-purple-400" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
                       Change Master Password
                     </h3>
@@ -329,7 +329,7 @@ export function AdminDashboard({ onLogout }) {
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Min 6 characters"
-                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-emerald-400 font-mono transition-colors"
+                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
                           />
                           <button
                             type="button"
@@ -337,7 +337,7 @@ export function AdminDashboard({ onLogout }) {
                             className="absolute right-3 top-3 text-white/40 hover:text-white transition-colors focus:outline-none cursor-pointer"
                             title={showPass ? 'Hide password' : 'Show password'}
                           >
-                            {showPass ? <EyeOff className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4" />}
+                            {showPass ? <EyeOff className="w-4 h-4 text-purple-400" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
@@ -353,7 +353,7 @@ export function AdminDashboard({ onLogout }) {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirm new password"
-                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-emerald-400 font-mono transition-colors"
+                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
                           />
                           <button
                             type="button"
@@ -361,7 +361,7 @@ export function AdminDashboard({ onLogout }) {
                             className="absolute right-3 top-3 text-white/40 hover:text-white transition-colors focus:outline-none cursor-pointer"
                             title={showPass ? 'Hide password' : 'Show password'}
                           >
-                            {showPass ? <EyeOff className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4" />}
+                            {showPass ? <EyeOff className="w-4 h-4 text-purple-400" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
@@ -371,7 +371,7 @@ export function AdminDashboard({ onLogout }) {
                       <div
                         className={`flex items-center gap-2 p-3 rounded-xl text-xs font-mono border ${
                           passwordMsg.type === 'success'
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                            ? 'bg-purple-500/10 border-purple-500/20 text-purple-300'
                             : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
                         }`}
                       >

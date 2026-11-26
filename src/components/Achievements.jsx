@@ -224,9 +224,6 @@ export function Achievements() {
         {/* Section Header: Compact & Integrated */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-14">
           <FadeIn y={20}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-2">
-              [ 08 / RECOGNITION &amp; HACKATHONS ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none"
               style={{
@@ -382,7 +379,7 @@ export function Achievements() {
                     {/* Project Tag */}
                     {item.project && (
                       <div className="mt-2.5 mb-3">
-                        <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 line-clamp-1 inline-block">
+                        <span className="text-[11px] font-mono text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/20 line-clamp-1 inline-block">
                           Project: {item.project}
                         </span>
                       </div>
@@ -400,7 +397,6 @@ export function Achievements() {
                       <span>Click card for details &amp; certificate</span>
                       <span>↗</span>
                     </span>
-                    <span className="text-[10px] uppercase text-white/30">Verified</span>
                   </div>
                 </div>
               </motion.div>
@@ -440,7 +436,7 @@ export function Achievements() {
               <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0C0C0C]">
                 <div>
                   <span className="text-[11px] font-mono uppercase tracking-wider text-purple-400">
-                    {activeCert.highlight || 'Competitive Milestone'}
+                    {activeCert.highlight || 'Achievement'}
                   </span>
                   <h3 className="text-base sm:text-xl font-bold uppercase tracking-tight text-white font-kanit">
                     {activeCert.title}
@@ -491,7 +487,7 @@ export function Achievements() {
                     </span>
                   )}
                   {activeCert.project && (
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+                    <span className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300">
                       💻 Project: {activeCert.project}
                     </span>
                   )}

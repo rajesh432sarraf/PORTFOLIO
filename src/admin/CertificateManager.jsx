@@ -52,7 +52,7 @@ export function CertificateManager() {
       title: '',
       issuer: '',
       year: new Date().getFullYear().toString(),
-      badge: 'VERIFIED CREDENTIAL',
+      badge: 'Certificate',
       credentialUrl: '',
       image: '',
     });
@@ -112,7 +112,7 @@ export function CertificateManager() {
       title: currentCert.title.trim(),
       issuer: currentCert.issuer.trim(),
       year: currentCert.year.trim(),
-      badge: currentCert.badge.trim() || 'VERIFIED CREDENTIAL',
+      badge: currentCert.badge.trim() || 'Certificate',
       credentialUrl: currentCert.credentialUrl.trim(),
       image: currentCert.image || '',
     };
@@ -170,7 +170,7 @@ export function CertificateManager() {
             Certifications &amp; Credentials
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add and manage your verified certificates, specialized courses, and licenses via MongoDB Database.
+            Add and manage your certificates, specialized courses, and credentials.
           </p>
         </div>
         <button
@@ -192,7 +192,7 @@ export function CertificateManager() {
           </div>
         ) : certList.length === 0 ? (
           <div className="p-12 text-center text-white/40 font-mono text-xs">
-            No certificates found in database. Click "+ New Certificate" to add your verified credentials.
+            No certificates found. Click "+ New Certificate" to add your credentials.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -226,8 +226,8 @@ export function CertificateManager() {
                     <td className="py-4 px-4 text-white/70">{cert.issuer}</td>
                     <td className="py-4 px-4 text-white/50">{cert.year}</td>
                     <td className="py-4 px-4">
-                      <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                        {cert.badge || 'VERIFIED CREDENTIAL'}
+                      <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30">
+                        {cert.badge || 'Certificate'}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -330,7 +330,7 @@ export function CertificateManager() {
               <div>
                 <label className="text-xs font-mono uppercase text-white/60 block mb-1">Badge Tag / Label</label>
                 <input
-                  type="text" placeholder="e.g. VERIFIED CREDENTIAL or HONORS SPECIALIZATION"
+                  type="text" placeholder="e.g. Certificate, Specialization, Honors"
                   value={currentCert.badge}
                   onChange={(e) => setCurrentCert({ ...currentCert, badge: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-xs focus:outline-none focus:border-white/40 font-mono"

@@ -198,12 +198,12 @@ export function Certifications() {
     if (text.includes('essentials') || text.includes('javascript') || text.includes('basics')) {
       return {
         badge: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/30',
-        icon: <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />,
+        icon: <Award className="w-3.5 h-3.5 text-cyan-400" />,
       };
     }
     return {
-      badge: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/30',
-      icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
+      badge: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+      icon: <Award className="w-3.5 h-3.5 text-purple-400" />,
     };
   };
 
@@ -223,9 +223,6 @@ export function Certifications() {
         {/* Section Header: Compact & Integrated */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-14">
           <FadeIn y={20}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-2">
-              [ 09 / TECHNICAL CREDENTIALS ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none"
               style={{
@@ -302,7 +299,7 @@ export function Certifications() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-20px' }}
                 transition={{ duration: 0.6, delay: Math.min(idx * 0.08, 0.4) }}
-                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-emerald-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(16,185,129,0.18)] snap-start cursor-pointer"
+                className="group relative flex-shrink-0 w-[290px] sm:w-[340px] md:w-[380px] rounded-3xl bg-[#0E0E0E] border border-white/10 hover:border-purple-400/50 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(118,33,176,0.25)] snap-start cursor-pointer"
                 style={{ touchAction: 'pan-x pan-y' }}
                 role="button"
                 tabIndex={0}
@@ -322,7 +319,7 @@ export function Certifications() {
 
                     {/* Quick View Overlay on Hover */}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-xs font-mono text-white">
-                      <Maximize2 className="w-4 h-4 text-emerald-400" />
+                      <Maximize2 className="w-4 h-4 text-purple-400" />
                       <span>View Certificate</span>
                     </div>
 
@@ -332,7 +329,7 @@ export function Certifications() {
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider backdrop-blur-md border ${tier.badge} truncate`}
                       >
                         {tier.icon}
-                        <span className="truncate">{cert.badge || 'VERIFIED CREDENTIAL'}</span>
+                        <span className="truncate">{cert.badge || 'Certificate'}</span>
                       </span>
                     </div>
 
@@ -351,7 +348,7 @@ export function Certifications() {
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider border ${tier.badge}`}
                     >
                       {tier.icon}
-                      <span>{cert.badge || 'VERIFIED CREDENTIAL'}</span>
+                      <span>{cert.badge || 'Certificate'}</span>
                     </span>
                     {cert.year && (
                       <span className="text-[11px] font-mono text-white/50">{cert.year}</span>
@@ -371,7 +368,7 @@ export function Certifications() {
                         <h3 className="text-base sm:text-lg font-bold uppercase tracking-tight text-white leading-snug line-clamp-2">
                           {cert.title}
                         </h3>
-                        <p className="text-xs font-mono uppercase tracking-wider text-emerald-400/80 line-clamp-1 mt-1">
+                        <p className="text-xs font-mono uppercase tracking-wider text-purple-300/80 line-clamp-1 mt-1">
                           {cert.issuer}
                         </p>
                       </div>
@@ -380,25 +377,23 @@ export function Certifications() {
 
                   {/* Card Bottom CTA */}
                   <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
-                    <span className="text-white/60 group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                    <span className="text-white/60 group-hover:text-purple-300 transition-colors flex items-center gap-1.5">
                       <span>Click card to view</span>
                       <span>↗</span>
                     </span>
 
-                    {hasWebUrl ? (
+                    {hasWebUrl && (
                       <a
                         href={cert.credentialUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-[11px] font-mono text-[#D7E2EA]/50 hover:text-emerald-400 transition-colors"
-                        title="Verify on official issuer portal"
+                        className="inline-flex items-center gap-1 text-[11px] font-mono text-[#D7E2EA]/50 hover:text-white transition-colors"
+                        title="Open credential URL"
                       >
-                        <span>Verify</span>
+                        <span>Open Link</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
-                    ) : (
-                      <span className="text-[10px] uppercase text-white/30">Verified</span>
                     )}
                   </div>
                 </div>
@@ -442,7 +437,7 @@ export function Certifications() {
               {/* Modal Top Bar */}
               <div className="flex items-center justify-between px-5 sm:px-8 py-4 border-b border-white/10 bg-[#0C0C0C]/90 backdrop-blur-md">
                 <div className="flex items-center gap-3 min-w-0 pr-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex-shrink-0">
+                  <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex-shrink-0">
                     <Award className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
@@ -457,18 +452,18 @@ export function Certifications() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                  {/* Official Verification URL (if web link) */}
+                  {/* Official URL (if web link) */}
                   {activeCert.credentialUrl && activeCert.credentialUrl.startsWith('http') && (
                     <a
                       href={activeCert.credentialUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-mono uppercase tracking-wider hover:bg-emerald-500/20 transition-all"
-                      title="Open official verification page"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/20 bg-white/[0.04] text-white/80 text-xs font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white transition-all"
+                      title="Open credential page"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Verify Online</span>
-                      <span className="sm:hidden">Verify</span>
+                      <span className="hidden sm:inline">Open Link</span>
+                      <span className="sm:hidden">Open</span>
                     </a>
                   )}
 
@@ -506,16 +501,16 @@ export function Certifications() {
                       className="max-w-full max-h-[62vh] object-contain rounded-xl shadow-2xl border border-white/10 bg-neutral-900"
                     />
                     <div className="mt-4 flex items-center justify-between w-full text-xs font-mono text-[#D7E2EA]/50 px-1">
-                      <span className="flex items-center gap-1.5 text-emerald-400">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {activeCert.badge || 'VERIFIED CREDENTIAL'}
+                      <span className="flex items-center gap-1.5 text-purple-300">
+                        <Award className="w-3.5 h-3.5" />
+                        {activeCert.badge || 'Certificate'}
                       </span>
                       <span>{activeCert.issuer}</span>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-12 px-4">
-                    <Award className="w-12 h-12 text-emerald-400 mx-auto mb-4 opacity-80" />
+                    <Award className="w-12 h-12 text-purple-400 mx-auto mb-4 opacity-80" />
                     <p className="text-base text-white font-bold mb-2">{activeCert.title}</p>
                     <p className="text-sm text-[#D7E2EA]/60 mb-6">
                       Issued by {activeCert.issuer} in {activeCert.year}
@@ -525,9 +520,9 @@ export function Certifications() {
                         href={activeCert.credentialUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500 text-black font-semibold text-xs tracking-wider uppercase hover:bg-emerald-400 transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase hover:bg-neutral-200 transition-all"
                       >
-                        <span>Open Verification Page</span>
+                        <span>Open Credential Page</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}

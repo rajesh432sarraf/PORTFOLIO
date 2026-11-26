@@ -50,9 +50,6 @@ export function Skills() {
         {/* Section Header */}
         <div className="mb-16 sm:mb-20">
           <FadeIn y={30}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-3">
-              [ 04 / CAPABILITIES ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none"
               style={{

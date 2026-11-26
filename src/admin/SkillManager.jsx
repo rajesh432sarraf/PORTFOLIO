@@ -234,7 +234,7 @@ export function SkillManager() {
             Skills &amp; Capabilities Management
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add, edit, reorder, and manage your technical categories, descriptions, and technology pills stored in MongoDB Atlas.
+            Add, edit, reorder, and manage your technical skill categories and pills.
           </p>
         </div>
 
@@ -252,12 +252,12 @@ export function SkillManager() {
       <div className="rounded-2xl border border-white/10 bg-[#0E0E0E] overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
-            <span>Loading skills records from database...</span>
+            <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
+            <span>Loading skills records...</span>
           </div>
         ) : skillList.length === 0 ? (
           <div className="p-12 text-center text-white/40 font-mono text-xs">
-            No skill categories found in database. Click "+ New Skill Group" to add your skills.
+            No skill categories found. Click "+ New Skill Group" to add your skills.
           </div>
         ) : (
           <div className="overflow-x-auto">

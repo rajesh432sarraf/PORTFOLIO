@@ -242,8 +242,8 @@ export function ProjectManager() {
     <div className="space-y-6">
       {/* Save Notification Toast */}
       {saveNotification && (
-        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2">
-          <Check className="w-4 h-4 text-emerald-400" />
+        <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono flex items-center gap-2">
+          <Check className="w-4 h-4 text-purple-400" />
           <span>{saveNotification}</span>
         </div>
       )}
@@ -592,7 +592,7 @@ export function ProjectManager() {
                     </span>
                   )}
                   {!isCompressing && currentProject.image && (
-                    <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                    <span className="text-[10px] font-mono text-purple-300 flex items-center gap-1">
                       <Check className="w-3 h-3" /> Ready &amp; Optimized
                     </span>
                   )}

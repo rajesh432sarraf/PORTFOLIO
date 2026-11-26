@@ -171,7 +171,7 @@ export function MessageManager() {
                     onClick={() => toggleFeature(msg._id || msg.id)}
                     className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono flex items-center gap-1 transition-colors cursor-pointer ${
                       msg.showOnWebsite
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        ? 'bg-purple-500/10 text-purple-300 border-purple-500/30'
                         : 'border-white/10 text-white/40 hover:text-white'
                     }`}
                     title="Toggle public visibility on portfolio website"
@@ -194,7 +194,7 @@ export function MessageManager() {
                     <button
                       type="button"
                       onClick={() => updateStatus(msg._id || msg.id, 'replied')}
-                      className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-emerald-400 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg border border-white/10 text-white/60 hover:text-purple-300 transition-colors cursor-pointer"
                       title="Mark as Replied"
                     >
                       <CheckCheck className="w-3.5 h-3.5" />

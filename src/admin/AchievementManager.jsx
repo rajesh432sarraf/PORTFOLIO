@@ -55,7 +55,7 @@ export function AchievementManager() {
       event: '',
       project: '',
       year: new Date().getFullYear().toString(),
-      highlight: 'Competitive Milestone',
+      highlight: 'Hackathon Win',
       description: '',
       image: '',
     });
@@ -182,7 +182,7 @@ export function AchievementManager() {
             Achievements &amp; Hackathons
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Showcase your hackathon wins, national recognitions, and competitive milestones via MongoDB Database.
+            Showcase your hackathon wins, recognitions, and project achievements.
           </p>
         </div>
         <button
@@ -240,8 +240,8 @@ export function AchievementManager() {
                     </td>
                     <td className="py-4 px-4 text-white font-bold tracking-tight uppercase font-kanit text-sm">{ach.title}</td>
                     <td className="py-4 px-4 text-white/70">{ach.event}</td>
-                    <td className="py-4 px-4 text-emerald-400">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px]">{ach.project}</span>
+                    <td className="py-4 px-4 text-purple-300">
+                      <span className="px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-[10px]">{ach.project}</span>
                     </td>
                     <td className="py-4 px-4 text-white/50">{ach.year}</td>
                     <td className="py-4 px-4 text-white/60">{ach.highlight}</td>

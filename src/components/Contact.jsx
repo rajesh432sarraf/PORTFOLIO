@@ -170,9 +170,6 @@ export function Contact() {
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">
           <FadeIn y={30}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-3">
-              [ 11 / INITIATE CONTACT ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none mb-6"
               style={{
@@ -193,10 +190,10 @@ export function Contact() {
             <FadeIn y={20}>
               <div className="flex items-center justify-between mb-6 sm:mb-8">
                 <span className="text-xs font-mono uppercase tracking-widest text-[#D7E2EA]/50">
-                  [ COLLABORATOR NOTES &amp; RECOMMENDATIONS ]
+                  COLLABORATOR NOTES &amp; RECOMMENDATIONS
                 </span>
-                <span className="text-xs font-mono text-emerald-400/80 uppercase">
-                  {publicNotes.length} Verified {publicNotes.length === 1 ? 'Note' : 'Notes'}
+                <span className="text-xs font-mono text-[#D7E2EA]/50 uppercase">
+                  {publicNotes.length} {publicNotes.length === 1 ? 'Note' : 'Notes'}
                 </span>
               </div>
 
@@ -216,9 +213,6 @@ export function Contact() {
                         </h4>
                         <p className="text-xs font-mono text-[#BBCCD7]/60">{note.subject}</p>
                       </div>
-                      <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-emerald-400">
-                        VERIFIED NOTE
-                      </span>
                     </div>
                   </div>
                 ))}
@@ -239,7 +233,7 @@ export function Contact() {
                 transition={{ duration: 0.5, ease: easeEditorial }}
                 className="py-12 sm:py-16 flex flex-col items-center text-center"
               >
-                <div className="p-4 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-6">
+                <div className="p-4 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 mb-6">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight text-[#D7E2EA] mb-3">

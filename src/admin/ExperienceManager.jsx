@@ -153,7 +153,7 @@ export function ExperienceManager() {
             Experience Management
           </h2>
           <p className="text-xs font-mono text-white/50">
-            Add, update, and manage your internships, work roles, and professional contributions via MongoDB Database.
+            Add, update, and manage your internships, work roles, and professional contributions.
           </p>
         </div>
 

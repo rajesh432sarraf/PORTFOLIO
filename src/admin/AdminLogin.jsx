@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -122,7 +122,7 @@ export function AdminLogin({ onLoginSuccess }) {
                   title={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-4 h-4 text-emerald-400" />
+                    <EyeOff className="w-4 h-4 text-purple-400" />
                   ) : (
                     <Eye className="w-4 h-4" />
                   )}
@@ -147,10 +147,7 @@ export function AdminLogin({ onLoginSuccess }) {
           </form>
 
           <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-[#D7E2EA]/40">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Protected Session</span>
-            </span>
+            <span>Portfolio CMS</span>
             <a href="/" className="hover:text-white transition-colors">
               ← Return to Site
             </a>

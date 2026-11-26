@@ -212,7 +212,7 @@ export function ResumeManager() {
             Resume &amp; CV Management
           </h2>
           <p className="text-xs font-mono text-white/50 mt-1">
-            Upload new resume PDF or link cloud document directly via MongoDB Database.
+            Upload new resume PDF or link cloud document.
           </p>
         </div>
 
@@ -435,7 +435,7 @@ export function ResumeManager() {
             {saving ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Publishing to MongoDB...</span>
+                <span>Saving Resume...</span>
               </>
             ) : (
               <>

@@ -51,9 +51,6 @@ export function Experience() {
         {/* Section Header */}
         <div className="mb-16 sm:mb-24">
           <FadeIn y={30}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-3">
-              [ 07 / PRACTICAL EXPERIENCE ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none"
               style={{
@@ -127,11 +124,6 @@ export function Experience() {
                       ))}
                     </div>
                   )}
-                </div>
-
-                <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-[#D7E2EA]/40">
-                  <Briefcase className="w-4 h-4 text-[#D7E2EA]/50" />
-                  <span>VERIFIED RECORD</span>
                 </div>
               </div>
             </motion.div>

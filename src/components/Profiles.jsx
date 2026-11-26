@@ -42,9 +42,6 @@ export function Profiles() {
         {/* Section Header */}
         <div className="mb-16 sm:mb-24">
           <FadeIn y={30}>
-            <span className="text-xs sm:text-sm uppercase tracking-widest text-[#D7E2EA]/40 font-mono block mb-3">
-              [ 10 / PROFILES &amp; COMMUNITY ]
-            </span>
             <h2
               className="hero-heading font-black tracking-tight uppercase leading-none select-none"
               style={{
