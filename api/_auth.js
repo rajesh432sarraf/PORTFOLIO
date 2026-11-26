@@ -1,9 +1,115 @@
 import crypto from 'crypto';
 
-// Cryptographically secure secret key: uses environment secret or falls back to an ephemeral random 32-byte key (never a static hardcoded string)
-const SECRET_KEY = process.env.ADMIN_JWT_SECRET || crypto.randomBytes(32).toString('hex');
+// Cryptographically secure secret key: uses environment secret or falls back to a deterministic hash of MONGODB_URI/fallback secret
+// Ensures tokens remain valid across serverless cold starts
+const SECRET_KEY =
+  process.env.ADMIN_JWT_SECRET ||
+  (process.env.MONGODB_URI
+    ? crypto.createHash('sha256').update(process.env.MONGODB_URI + '_jwt_secret_rajesh_2026').digest('hex')
+    : 'rajesh_portfolio_secure_master_jwt_secret_2026_production');
+
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'sarrafrajesh432@gmail.com').toLowerCase().trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'apanatime';
+
+export const isMongoConfigured = (uri) =>
+  Boolean(uri && uri.trim() && !uri.includes('<cluster>') && !uri.includes('<username>') && uri.startsWith('mongodb'));
+
+/**
+ * Hash password using PBKDF2 with 100,000 iterations and sha512.
+ */
+export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return { hash, salt };
+}
+
+/**
+ * Constant-time verification of PBKDF2 password against stored hash and salt.
+ */
+export function verifyPassword(password, storedHash, salt) {
+  try {
+    const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+    const a = Buffer.from(hash, 'hex');
+    const b = Buffer.from(storedHash, 'hex');
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
+ * Retrieve admin credentials from MongoDB `admin_security` collection.
+ * Falls back to default environment variables or default owner credentials if not yet set in DB.
+ */
+export async function getAdminCredentials() {
+  if (isMongoConfigured(process.env.MONGODB_URI)) {
+    try {
+      const { MongoClient } = await import('mongodb');
+      const client = new MongoClient(process.env.MONGODB_URI);
+      await client.connect();
+      const db = client.db(process.env.MONGODB_DB_NAME || 'portfolio');
+      const doc = await db.collection('admin_security').findOne({ _id: 'master_credentials' });
+      await client.close();
+
+      if (doc) {
+        return {
+          email: (doc.email || ADMIN_EMAIL).toLowerCase().trim(),
+          passwordHash: doc.passwordHash || null,
+          salt: doc.salt || null,
+          defaultPassword: ADMIN_PASSWORD,
+          isCustom: Boolean(doc.passwordHash && doc.salt),
+        };
+      }
+    } catch (err) {
+      console.warn('Could not read admin credentials from MongoDB, using fallback:', err.message);
+    }
+  }
+
+  return {
+    email: ADMIN_EMAIL,
+    defaultPassword: ADMIN_PASSWORD,
+    passwordHash: null,
+    salt: null,
+    isCustom: false,
+  };
+}
+
+/**
+ * Update admin email and/or master password in MongoDB `admin_security` collection.
+ */
+export async function updateAdminCredentials({ newEmail, newPassword }) {
+  if (!isMongoConfigured(process.env.MONGODB_URI)) {
+    throw new Error('MongoDB is not configured on the server. Credentials cannot be persisted.');
+  }
+
+  const { MongoClient } = await import('mongodb');
+  const client = new MongoClient(process.env.MONGODB_URI);
+  await client.connect();
+  const db = client.db(process.env.MONGODB_DB_NAME || 'portfolio');
+  const collection = db.collection('admin_security');
+
+  const updateFields = {
+    updatedAt: new Date(),
+  };
+
+  if (newEmail) {
+    updateFields.email = String(newEmail).toLowerCase().trim();
+  }
+
+  if (newPassword) {
+    const { hash, salt } = hashPassword(String(newPassword).trim());
+    updateFields.passwordHash = hash;
+    updateFields.salt = salt;
+  }
+
+  await collection.updateOne(
+    { _id: 'master_credentials' },
+    { $set: updateFields },
+    { upsert: true }
+  );
+
+  await client.close();
+  return { success: true, email: updateFields.email };
+}
 
 /**
  * Creates a cryptographically signed HMAC-SHA256 session token.

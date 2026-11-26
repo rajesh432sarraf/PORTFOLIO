@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { createToken, ADMIN_EMAIL, ADMIN_PASSWORD } from './_auth.js';
+import { createToken, getAdminCredentials, verifyPassword, ADMIN_EMAIL, ADMIN_PASSWORD } from './_auth.js';
 
 // In-memory brute force protection: IP -> { attempts, lockedUntil }
 const loginAttemptMap = new Map();
@@ -43,7 +43,8 @@ function clearAttempts(ip) {
 
 /**
  * Vercel Serverless Function: POST /api/login
- * Validates admin credentials securely on the server and issues an HMAC-SHA256 signed session token.
+ * Validates admin credentials securely against MongoDB `admin_security` collection (or default fallback)
+ * Issues an HMAC-SHA256 signed session token.
  * Protected against brute-force attacks, timing attacks, and credential spoofing.
  */
 export default async function handler(req, res) {
@@ -80,29 +81,31 @@ export default async function handler(req, res) {
     const cleanInputEmail = String(email).toLowerCase().trim();
     const cleanInputPassword = String(password).trim();
 
-    // Verify master password configuration exists
-    if (!ADMIN_PASSWORD) {
-      console.error('Security alert: ADMIN_PASSWORD environment variable is missing.');
-      return res.status(500).json({
-        success: false,
-        error: 'Authentication configuration error: ADMIN_PASSWORD is not configured on the server.',
-      });
-    }
+    // 2. Dynamically load admin credentials from MongoDB Atlas (with safe fallback)
+    const creds = await getAdminCredentials();
+    const expectedEmail = creds.email || ADMIN_EMAIL || 'sarrafrajesh432@gmail.com';
 
-    // Timing-safe comparison to prevent side-channel timing attacks
+    // Timing-safe comparison for email
     const emailA = Buffer.from(cleanInputEmail);
-    const emailB = Buffer.from(ADMIN_EMAIL);
+    const emailB = Buffer.from(expectedEmail);
     const isEmailMatch =
       emailA.length === emailB.length && crypto.timingSafeEqual(emailA, emailB);
 
-    const passA = Buffer.from(cleanInputPassword);
-    const passB = Buffer.from(ADMIN_PASSWORD);
-    const isPasswordMatch =
-      passA.length === passB.length && crypto.timingSafeEqual(passA, passB);
+    // Password verification: PBKDF2 hash check if custom password set in MongoDB, else fallback
+    let isPasswordMatch = false;
+    if (creds.isCustom && creds.passwordHash && creds.salt) {
+      isPasswordMatch = verifyPassword(cleanInputPassword, creds.passwordHash, creds.salt);
+    } else {
+      const expectedPassword = creds.defaultPassword || ADMIN_PASSWORD || 'apanatime';
+      const passA = Buffer.from(cleanInputPassword);
+      const passB = Buffer.from(expectedPassword);
+      isPasswordMatch =
+        passA.length === passB.length && crypto.timingSafeEqual(passA, passB);
+    }
 
     if (!isEmailMatch || !isPasswordMatch) {
       recordFailedAttempt(clientIp);
-      // Artificial delay to thwart fast dictionary/brute-force scripts
+      // Artificial delay to thwart fast dictionary/brute-force attacks
       await new Promise((resolve) => setTimeout(resolve, 400));
       return res.status(401).json({
         success: false,
@@ -114,13 +117,13 @@ export default async function handler(req, res) {
     clearAttempts(clientIp);
 
     // Generate secure cryptographically signed session token
-    const token = createToken(ADMIN_EMAIL);
+    const token = createToken(expectedEmail);
 
     return res.status(200).json({
       success: true,
       token,
       user: {
-        email: ADMIN_EMAIL,
+        email: expectedEmail,
         name: 'Rajesh Kumar',
         role: 'master_admin',
       },

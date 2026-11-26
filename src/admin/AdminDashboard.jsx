@@ -37,14 +37,29 @@ export function AdminDashboard({ onLogout }) {
   const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
 
   useEffect(() => {
-    const email =
-      localStorage.getItem('rajesh_portfolio_owner_email') ||
+    const cachedEmail =
       sessionStorage.getItem('rajesh_portfolio_admin_email') ||
+      localStorage.getItem('rajesh_portfolio_owner_email') ||
       'sarrafrajesh432@gmail.com';
-    setAdminEmail(email);
+    setAdminEmail(cachedEmail);
+
+    const token = sessionStorage.getItem('rajesh_portfolio_admin_token');
+    if (token) {
+      fetch('/api/security', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.success && data.email) {
+            setAdminEmail(data.email);
+            sessionStorage.setItem('rajesh_portfolio_admin_email', data.email);
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
-  const handleUpdateEmail = (e) => {
+  const handleUpdateEmail = async (e) => {
     e.preventDefault();
     setEmailMsg({ text: '', type: '' });
     const clean = newEmail.toLowerCase().trim();
@@ -53,18 +68,41 @@ export function AdminDashboard({ onLogout }) {
       setEmailMsg({ text: 'Please enter a valid Gmail / Email address.', type: 'error' });
       return;
     }
-    localStorage.setItem('rajesh_portfolio_owner_email', clean);
-    sessionStorage.setItem('rajesh_portfolio_admin_email', clean);
-    window.dispatchEvent(new Event('portfolio_data_updated'));
-    setAdminEmail(clean);
-    setNewEmail('');
-    setEmailMsg({
-      text: `Authorized Owner Gmail successfully updated to: ${clean}`,
-      type: 'success',
-    });
+
+    const token = sessionStorage.getItem('rajesh_portfolio_admin_token');
+    try {
+      const response = await fetch('/api/security', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'update_email', newEmail: clean }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data.success) {
+        localStorage.setItem('rajesh_portfolio_owner_email', clean);
+        sessionStorage.setItem('rajesh_portfolio_admin_email', clean);
+        window.dispatchEvent(new Event('portfolio_data_updated'));
+        setAdminEmail(clean);
+        setNewEmail('');
+        setEmailMsg({
+          text: `Authorized Owner Gmail successfully updated in database: ${clean}`,
+          type: 'success',
+        });
+      } else {
+        setEmailMsg({
+          text: data.error || 'Failed to update email. Please check your connection.',
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      setEmailMsg({ text: 'Network error updating email.', type: 'error' });
+    }
   };
 
-  const handleUpdatePassword = (e) => {
+  const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setPasswordMsg({ text: '', type: '' });
     if (newPassword.length < 6) {
@@ -75,10 +113,35 @@ export function AdminDashboard({ onLogout }) {
       setPasswordMsg({ text: 'Passwords do not match. Please re-enter.', type: 'error' });
       return;
     }
-    localStorage.setItem('rajesh_portfolio_master_password', newPassword);
-    setPasswordMsg({ text: 'Master password updated successfully!', type: 'success' });
-    setNewPassword('');
-    setConfirmPassword('');
+
+    const token = sessionStorage.getItem('rajesh_portfolio_admin_token');
+    try {
+      const response = await fetch('/api/security', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'update_password', newPassword }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data.success) {
+        setPasswordMsg({
+          text: 'Master password successfully updated in MongoDB database! You can now use this password on your next login.',
+          type: 'success',
+        });
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setPasswordMsg({
+          text: data.error || 'Failed to update password.',
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      setPasswordMsg({ text: 'Network error updating password.', type: 'error' });
+    }
   };
 
   const handleLogout = () => {
