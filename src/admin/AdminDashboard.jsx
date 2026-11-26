@@ -143,7 +143,7 @@ export function AdminDashboard({ onLogout }) {
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
-            <Code className="w-4 h-4 text-cyan-400" />
+            <Code className="w-4 h-4" />
             <span>Skills</span>
           </button>
 
@@ -208,7 +208,7 @@ export function AdminDashboard({ onLogout }) {
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
-            <FileText className="w-4 h-4 text-purple-400" />
+            <FileText className="w-4 h-4" />
             <span>Resume (CV)</span>
           </button>
 
@@ -221,7 +221,7 @@ export function AdminDashboard({ onLogout }) {
                 : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
-            <Shield className="w-4 h-4 text-purple-400" />
+            <Shield className="w-4 h-4" />
             <span>Security & Access</span>
           </button>
         </aside>
@@ -239,8 +239,8 @@ export function AdminDashboard({ onLogout }) {
 
           {activeTab === 'security' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
-                Security &amp; Access Controls
+              <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
+                SECURITY &amp; ACCESS
               </h2>
 
               <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 p-6 space-y-6">

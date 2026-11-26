@@ -250,10 +250,13 @@ export function ProjectManager() {
 
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
-            Projects Management &amp; Showcase
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
+            PROJECTS
           </h2>
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+            {projectList.length}
+          </span>
         </div>
 
         <button
@@ -277,13 +280,13 @@ export function ProjectManager() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[650px]">
             <thead>
-              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/40 bg-white/[0.02]">
-                <th className="py-3.5 px-4">#</th>
-                <th className="py-3.5 px-4">Cover</th>
-                <th className="py-3.5 px-4">Title &amp; Category</th>
-                <th className="py-3.5 px-4">Year</th>
-                <th className="py-3.5 px-4">Featured</th>
-                <th className="py-3.5 px-4 text-right">Order &amp; Actions</th>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/50 bg-white/[0.02]">
+                <th className="py-3.5 px-4 font-semibold">#</th>
+                <th className="py-3.5 px-4 font-semibold">Cover</th>
+                <th className="py-3.5 px-4 font-semibold">Project Title</th>
+                <th className="py-3.5 px-4 font-semibold">Year</th>
+                <th className="py-3.5 px-4 font-semibold">Featured</th>
+                <th className="py-3.5 px-4 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06] text-xs">

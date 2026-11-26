@@ -208,8 +208,8 @@ export function ResumeManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white font-kanit">
-            Resume &amp; CV Management
+          <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
+            RESUME (CV)
           </h2>
         </div>
 

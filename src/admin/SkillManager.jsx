@@ -229,16 +229,19 @@ export function SkillManager() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
-            Skills &amp; Capabilities Management
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
+            SKILLS
           </h2>
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+            {skillList.length}
+          </span>
         </div>
 
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-neutral-200 transition-colors cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>New Skill Group</span>
@@ -265,7 +268,7 @@ export function SkillManager() {
                   <th className="py-3.5 px-4 font-normal">Category Title</th>
                   <th className="py-3.5 px-4 font-normal">Description</th>
                   <th className="py-3.5 px-4 font-normal">Technologies / Skills</th>
-                  <th className="py-3.5 px-4 font-normal text-right">Order &amp; Actions</th>
+                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
