@@ -78,7 +78,7 @@ export function MessageManager() {
           <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
             MESSAGES
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-kanit font-semibold text-purple-300">
             {messages.length}
           </span>
         </div>
@@ -88,7 +88,7 @@ export function MessageManager() {
             type="button"
             onClick={loadMessages}
             disabled={isLoading}
-            className="px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-purple-500/40 text-white/80 hover:text-white transition-all cursor-pointer flex items-center gap-2 text-xs font-mono uppercase tracking-wider"
+            className="px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-purple-500/40 text-white/80 hover:text-white transition-all cursor-pointer flex items-center gap-2 text-xs font-kanit font-medium uppercase tracking-wider"
             title="Refresh Inquiries"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-purple-400' : ''}`} />

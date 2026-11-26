@@ -254,7 +254,7 @@ export function ProjectManager() {
           <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
             PROJECTS
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-kanit font-semibold text-purple-300">
             {projectList.length}
           </span>
         </div>
@@ -262,7 +262,7 @@ export function ProjectManager() {
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer self-start sm:self-auto"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer self-start sm:self-auto font-kanit"
         >
           <Plus className="w-4 h-4" />
           <span>New Project</span>
@@ -272,7 +272,7 @@ export function ProjectManager() {
       {/* Projects Grid / Table */}
       <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
         {isLoading && projectList.length === 0 ? (
-          <div className="py-16 text-center text-white/40 text-xs font-mono flex flex-col items-center justify-center gap-3">
+          <div className="py-16 text-center text-white/40 text-xs font-kanit flex flex-col items-center justify-center gap-3">
             <RefreshCw className="w-6 h-6 animate-spin text-purple-400" />
             <span>Connecting to MongoDB Database...</span>
           </div>
@@ -280,7 +280,7 @@ export function ProjectManager() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[650px]">
             <thead>
-              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-white/50 bg-white/[0.02]">
+              <tr className="border-b border-white/10 text-xs font-kanit uppercase tracking-wider text-white/50 bg-white/[0.02]">
                 <th className="py-3.5 px-4 font-semibold">#</th>
                 <th className="py-3.5 px-4 font-semibold">Cover</th>
                 <th className="py-3.5 px-4 font-semibold">Project Title</th>
@@ -292,7 +292,7 @@ export function ProjectManager() {
             <tbody className="divide-y divide-white/[0.06] text-xs">
               {projectList.map((p, index) => (
                 <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-4 px-4 font-mono text-white/40 font-bold">{p.number}</td>
+                  <td className="py-4 px-4 font-kanit text-white/40 font-bold">{p.number}</td>
 
                   {/* Thumbnail Preview */}
                   <td className="py-4 px-4">
@@ -317,7 +317,7 @@ export function ProjectManager() {
 
                   <td className="py-4 px-4">
                     <div className="flex flex-col">
-                      <div className="flex items-center gap-2 font-bold text-white text-sm">
+                      <div className="flex items-center gap-2 font-bold text-white text-sm font-kanit">
                         <span>{p.title}</span>
                         {p.live && (
                           <a href={p.live} target="_blank" rel="noreferrer" className="text-purple-400 hover:text-purple-300">
@@ -325,11 +325,11 @@ export function ProjectManager() {
                           </a>
                         )}
                       </div>
-                      <span className="text-[11px] font-mono text-white/50">{p.category}</span>
+                      <span className="text-xs font-kanit uppercase tracking-wider text-white/50 mt-0.5">{p.category}</span>
                     </div>
                   </td>
 
-                  <td className="py-4 px-4 text-white/60 font-mono">{p.year}</td>
+                  <td className="py-4 px-4 text-white/70 font-kanit font-medium">{p.year}</td>
 
                   <td className="py-4 px-4">
                     <button

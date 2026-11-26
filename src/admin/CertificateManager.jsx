@@ -169,14 +169,14 @@ export function CertificateManager() {
           <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
             CERTIFICATES
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-kanit font-semibold text-purple-300">
             {certList.length}
           </span>
         </div>
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer font-kanit"
         >
           <Plus className="w-4 h-4" />
           <span>New Certificate</span>
@@ -186,30 +186,30 @@ export function CertificateManager() {
       {/* Certificates Table */}
       <div className="rounded-2xl bg-[#0C0C0C] border border-white/10 overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs flex items-center justify-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
             <span>Loading certificates from database...</span>
           </div>
         ) : certList.length === 0 ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs">
             No certificates found. Click "+ New Certificate" to add your credentials.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse font-mono">
+            <table className="w-full text-left text-xs border-collapse font-kanit">
               <thead>
-                <tr className="border-b border-white/10 text-white/40 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 font-normal">Photo</th>
-                  <th className="py-3.5 px-4 font-normal">#</th>
-                  <th className="py-3.5 px-4 font-normal">Certificate Title</th>
-                  <th className="py-3.5 px-4 font-normal">Issuer / Platform</th>
-                  <th className="py-3.5 px-4 font-normal">Year</th>
-                  <th className="py-3.5 px-4 font-normal">Badge</th>
-                  <th className="py-3.5 px-4 font-normal">Link</th>
+                <tr className="border-b border-white/10 text-white/50 uppercase tracking-wider text-xs bg-white/[0.02]">
+                  <th className="py-3.5 px-4 font-semibold">Photo</th>
+                  <th className="py-3.5 px-4 font-semibold">#</th>
+                  <th className="py-3.5 px-4 font-semibold">Certificate Title</th>
+                  <th className="py-3.5 px-4 font-semibold">Issuer / Platform</th>
+                  <th className="py-3.5 px-4 font-semibold">Year</th>
+                  <th className="py-3.5 px-4 font-semibold">Badge</th>
+                  <th className="py-3.5 px-4 font-semibold">Link</th>
                   <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-white/[0.06] text-xs font-kanit">
                 {certList.map((cert, idx) => (
                   <tr key={cert.id || idx} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-4 px-4">

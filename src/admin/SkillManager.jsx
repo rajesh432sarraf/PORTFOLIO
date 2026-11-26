@@ -233,7 +233,7 @@ export function SkillManager() {
           <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
             SKILLS
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-kanit font-semibold text-purple-300">
             {skillList.length}
           </span>
         </div>
@@ -241,7 +241,7 @@ export function SkillManager() {
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer font-kanit"
         >
           <Plus className="w-4 h-4" />
           <span>New Skill Group</span>
@@ -249,29 +249,29 @@ export function SkillManager() {
       </div>
 
       {/* Skills Table / List */}
-      <div className="rounded-2xl border border-white/10 bg-[#0E0E0E] overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-[#0C0C0C] overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs flex items-center justify-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
             <span>Loading skills records...</span>
           </div>
         ) : skillList.length === 0 ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs">
             No skill categories found. Click "+ New Skill Group" to add your skills.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse font-kanit">
               <thead>
-                <tr className="border-b border-white/10 text-white/40 uppercase font-mono tracking-wider">
-                  <th className="py-3.5 px-4 font-normal">#</th>
-                  <th className="py-3.5 px-4 font-normal">Category Title</th>
-                  <th className="py-3.5 px-4 font-normal">Description</th>
-                  <th className="py-3.5 px-4 font-normal">Technologies / Skills</th>
+                <tr className="border-b border-white/10 text-white/50 uppercase tracking-wider text-xs bg-white/[0.02]">
+                  <th className="py-3.5 px-4 font-semibold">#</th>
+                  <th className="py-3.5 px-4 font-semibold">Category Title</th>
+                  <th className="py-3.5 px-4 font-semibold">Description</th>
+                  <th className="py-3.5 px-4 font-semibold">Technologies / Skills</th>
                   <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-mono">
+              <tbody className="divide-y divide-white/[0.06] text-xs">
                 {skillList.map((group, idx) => {
                   const pills = Array.isArray(group.skills)
                     ? group.skills
@@ -281,32 +281,32 @@ export function SkillManager() {
 
                   return (
                     <tr key={group.id || idx} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="py-4 px-4 text-cyan-400 font-bold text-sm font-kanit">
+                      <td className="py-4 px-4 text-purple-400 font-bold text-sm font-kanit">
                         {group.number || String(idx + 1).padStart(2, '0')}
                       </td>
                       <td className="py-4 px-4 font-medium text-white">
                         <span className="font-bold tracking-tight uppercase font-kanit text-sm block">
                           {group.title}
                         </span>
-                        <span className="text-[10px] text-white/40 font-mono">
+                        <span className="text-[11px] text-white/40 font-kanit">
                           {pills.length} technologies
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-white/60 max-w-xs truncate text-[11px] leading-relaxed">
+                      <td className="py-4 px-4 text-white/60 max-w-xs truncate text-xs leading-relaxed font-kanit">
                         {group.description}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-md">
+                        <div className="flex flex-wrap gap-1.5 max-w-md">
                           {pills.slice(0, 5).map((t, pIdx) => (
                             <span
                               key={`${t}-${pIdx}`}
-                              className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-white/80"
+                              className="px-2.5 py-0.5 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/90 font-kanit font-medium"
                             >
                               {t}
                             </span>
                           ))}
                           {pills.length > 5 && (
-                            <span className="text-[10px] font-mono text-cyan-400 self-center">
+                            <span className="text-xs font-kanit font-medium text-purple-300 self-center">
                               +{pills.length - 5} more
                             </span>
                           )}

@@ -152,7 +152,7 @@ export function ExperienceManager() {
           <h2 className="text-2xl font-black uppercase tracking-wider text-white font-kanit">
             EXPERIENCE
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-mono text-purple-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/25 text-xs font-kanit font-semibold text-purple-300">
             {experienceList.length}
           </span>
         </div>
@@ -160,7 +160,7 @@ export function ExperienceManager() {
         <button
           type="button"
           onClick={handleOpenNew}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D900B8] via-[#B600A8] to-[#7621B0] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_0_15px_rgba(182,0,168,0.4)] cursor-pointer font-kanit"
         >
           <Plus className="w-4 h-4" />
           <span>New Experience</span>
@@ -168,32 +168,32 @@ export function ExperienceManager() {
       </div>
 
       {/* Experience Table */}
-      <div className="rounded-2xl border border-white/10 bg-[#0E0E0E] overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-[#0C0C0C] overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs flex items-center justify-center gap-2">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs flex items-center justify-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-purple-400" />
             <span>Loading experience records from database...</span>
           </div>
         ) : experienceList.length === 0 ? (
-          <div className="p-12 text-center text-white/40 font-mono text-xs">
+          <div className="p-12 text-center text-white/40 font-kanit text-xs">
             No experience records found in database. Click "+ New Experience" to add your work roles.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse font-kanit">
               <thead>
-                <tr className="border-b border-white/10 text-white/40 uppercase font-mono tracking-wider">
-                  <th className="py-3.5 px-4 font-normal">#</th>
-                  <th className="py-3.5 px-4 font-normal">Role & Title</th>
-                  <th className="py-3.5 px-4 font-normal">Type</th>
-                  <th className="py-3.5 px-4 font-normal">Organization</th>
-                  <th className="py-3.5 px-4 font-normal">Period</th>
-                  <th className="py-3.5 px-4 font-normal">Location</th>
-                  <th className="py-3.5 px-4 font-normal">Tech Stack</th>
+                <tr className="border-b border-white/10 text-white/50 uppercase tracking-wider text-xs bg-white/[0.02]">
+                  <th className="py-3.5 px-4 font-semibold">#</th>
+                  <th className="py-3.5 px-4 font-semibold">Role &amp; Title</th>
+                  <th className="py-3.5 px-4 font-semibold">Type</th>
+                  <th className="py-3.5 px-4 font-semibold">Organization</th>
+                  <th className="py-3.5 px-4 font-semibold">Period</th>
+                  <th className="py-3.5 px-4 font-semibold">Location</th>
+                  <th className="py-3.5 px-4 font-semibold">Tech Stack</th>
                   <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-mono">
+              <tbody className="divide-y divide-white/[0.06] text-xs font-kanit">
                 {experienceList.map((exp, idx) => (
                   <tr key={exp.id || idx} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-4 px-4 text-white/40">

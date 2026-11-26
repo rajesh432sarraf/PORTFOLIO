@@ -81,7 +81,7 @@ export function AdminLogin({ onLoginSuccess }) {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-[#D7E2EA]/70">
+              <label className="text-xs font-kanit font-semibold uppercase tracking-wider text-[#D7E2EA]/70">
                 Admin Email
               </label>
               <div className="relative">
@@ -98,7 +98,7 @@ export function AdminLogin({ onLoginSuccess }) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-[#D7E2EA]/70">
+              <label className="text-xs font-kanit font-semibold uppercase tracking-wider text-[#D7E2EA]/70">
                 Password
               </label>
               <div className="relative">
@@ -143,7 +143,7 @@ export function AdminLogin({ onLoginSuccess }) {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-end text-[11px] font-mono text-[#D7E2EA]/40">
+          <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-end text-xs font-kanit font-medium text-[#D7E2EA]/50">
             <a href="/" className="hover:text-white transition-colors">
               ← Return to Site
             </a>

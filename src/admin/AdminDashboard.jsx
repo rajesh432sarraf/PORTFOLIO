@@ -101,7 +101,7 @@ export function AdminDashboard({ onLogout }) {
         <div className="flex items-center gap-4">
           <a
             href="/"
-            className="flex items-center gap-1.5 text-xs font-mono text-white/60 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs font-kanit font-medium uppercase tracking-wider text-white/60 hover:text-white transition-colors"
           >
             <span>Live Portfolio</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -110,7 +110,7 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-mono text-rose-300 hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-kanit font-medium uppercase tracking-wider text-rose-300 hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <LogOut className="w-3 h-3" />
             <span>Logout</span>
@@ -124,10 +124,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'projects'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -137,10 +137,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('skills')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'skills'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Code className="w-4 h-4" />
@@ -150,10 +150,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('messages')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'messages'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Mail className="w-4 h-4" />
@@ -163,10 +163,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('experience')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'experience'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Briefcase className="w-4 h-4" />
@@ -176,10 +176,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('achievements')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'achievements'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Trophy className="w-4 h-4" />
@@ -189,10 +189,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('certifications')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'certifications'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Award className="w-4 h-4" />
@@ -202,10 +202,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('resume')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'resume'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -215,10 +215,10 @@ export function AdminDashboard({ onLogout }) {
           <button
             type="button"
             onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-[13px] font-kanit font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'security'
-                ? 'bg-white text-black font-bold shadow-lg'
-                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-white text-black font-bold shadow-[0_4px_20px_rgba(255,255,255,0.15)]'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Shield className="w-4 h-4" />
@@ -248,19 +248,19 @@ export function AdminDashboard({ onLogout }) {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Mail className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white font-kanit">
                       Change Authorized Owner Gmail
                     </h3>
                   </div>
 
                   <form onSubmit={handleUpdateEmail} className="space-y-4 max-w-lg">
-                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs font-mono">
+                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs font-kanit">
                       <span className="text-white/40 block text-[11px] uppercase tracking-wider mb-1">Current Active Gmail</span>
                       <span className="text-white font-semibold text-sm">{adminEmail}</span>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-mono uppercase text-white/60 mb-1.5">
+                      <label className="block text-xs font-kanit uppercase tracking-wider text-white/60 mb-1.5">
                         New Owner Gmail Address
                       </label>
                       <input
@@ -269,13 +269,13 @@ export function AdminDashboard({ onLogout }) {
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="yourname@gmail.com"
-                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-kanit transition-colors"
                       />
                     </div>
 
                     {emailMsg.text && (
                       <div
-                        className={`flex items-center gap-2 p-3 rounded-xl text-xs font-mono border ${
+                        className={`flex items-center gap-2 p-3 rounded-xl text-xs font-kanit border ${
                           emailMsg.type === 'success'
                             ? 'bg-purple-500/10 border-purple-500/20 text-purple-300'
                             : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
@@ -292,7 +292,7 @@ export function AdminDashboard({ onLogout }) {
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-mono font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-kanit font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
                     >
                       Save New Gmail
                     </button>
@@ -303,7 +303,7 @@ export function AdminDashboard({ onLogout }) {
                 <div className="border-t border-white/10 pt-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Key className="w-4 h-4 text-purple-400" />
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-white font-mono">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white font-kanit">
                       Change Master Password
                     </h3>
                   </div>
@@ -311,7 +311,7 @@ export function AdminDashboard({ onLogout }) {
                   <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-lg">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-mono uppercase text-white/60 mb-1.5">
+                        <label className="block text-xs font-kanit uppercase tracking-wider text-white/60 mb-1.5">
                           New Master Password
                         </label>
                         <div className="relative">
@@ -321,7 +321,7 @@ export function AdminDashboard({ onLogout }) {
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Min 6 characters"
-                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
+                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-kanit transition-colors"
                           />
                           <button
                             type="button"
@@ -335,7 +335,7 @@ export function AdminDashboard({ onLogout }) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-mono uppercase text-white/60 mb-1.5">
+                        <label className="block text-xs font-kanit uppercase tracking-wider text-white/60 mb-1.5">
                           Confirm Password
                         </label>
                         <div className="relative">
@@ -345,7 +345,7 @@ export function AdminDashboard({ onLogout }) {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirm new password"
-                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-mono transition-colors"
+                            className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 text-sm focus:outline-none focus:border-white/40 font-kanit transition-colors"
                           />
                           <button
                             type="button"
@@ -361,7 +361,7 @@ export function AdminDashboard({ onLogout }) {
 
                     {passwordMsg.text && (
                       <div
-                        className={`flex items-center gap-2 p-3 rounded-xl text-xs font-mono border ${
+                        className={`flex items-center gap-2 p-3 rounded-xl text-xs font-kanit border ${
                           passwordMsg.type === 'success'
                             ? 'bg-purple-500/10 border-purple-500/20 text-purple-300'
                             : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
@@ -378,7 +378,7 @@ export function AdminDashboard({ onLogout }) {
 
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-mono font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
+                      className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-kanit font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
                     >
                       Save New Password
                     </button>

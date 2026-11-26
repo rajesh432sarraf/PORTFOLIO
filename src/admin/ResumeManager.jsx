@@ -220,7 +220,7 @@ export function ResumeManager() {
               href={activeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs font-mono text-white hover:bg-white/10 hover:border-white/30 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs font-kanit font-medium text-white hover:bg-white/10 hover:border-white/30 transition-all"
             >
               <Eye className="w-3.5 h-3.5 text-purple-400" />
               <span>Preview Active Resume</span>
@@ -233,7 +233,7 @@ export function ResumeManager() {
       {/* Alert Messages */}
       {msg.text && (
         <div
-          className={`p-4 rounded-2xl border text-xs font-mono flex items-start gap-3 ${
+          className={`p-4 rounded-2xl border text-xs font-kanit flex items-start gap-3 ${
             msg.type === 'error'
               ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
               : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
@@ -370,7 +370,7 @@ export function ResumeManager() {
 
             {/* Custom display name */}
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
+              <label className="block text-xs font-kanit font-semibold uppercase tracking-wider text-white/70 mb-2">
                 Display File Name (Optional)
               </label>
               <input
@@ -388,7 +388,7 @@ export function ResumeManager() {
         {sourceType === 'url' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
+              <label className="block text-xs font-kanit font-semibold uppercase tracking-wider text-white/70 mb-2">
                 External Resume URL (Google Drive, Cloudinary, Supabase, Dropbox)
               </label>
               <input
@@ -408,7 +408,7 @@ export function ResumeManager() {
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
+              <label className="block text-xs font-kanit font-semibold uppercase tracking-wider text-white/70 mb-2">
                 Display File Name
               </label>
               <input
@@ -427,7 +427,7 @@ export function ResumeManager() {
           <button
             type="submit"
             disabled={saving || (sourceType === 'file' && !fileBase64 && !currentResume?.fileData)}
-            className="px-6 py-3 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-neutral-200 transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+            className="px-6 py-3 rounded-full bg-white text-black font-bold font-kanit text-xs uppercase tracking-wider hover:bg-neutral-200 transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
           >
             {saving ? (
               <>
