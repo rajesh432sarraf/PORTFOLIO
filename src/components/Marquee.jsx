@@ -8,9 +8,9 @@ const ROW_1_ITEMS = [
   'CSS3',
   'Tailwind CSS',
   'Vite',
-  'Framer Motion',
-  'GSAP',
-  'Lenis',
+  'Java',
+  'C',
+  'SQL',
   'Git',
   'GitHub',
 ];
@@ -19,15 +19,15 @@ const ROW_2_ITEMS = [
   'Node.js',
   'Express',
   'Python',
-  'FastAPI',
   'Flask',
+  'PHP',
+  'Socket.io',
   'MongoDB',
   'MySQL',
   'Supabase',
-  'AI',
-  'RAG',
-  'LLM',
+  'Firebase',
   'REST API',
+  'LLM APIs',
 ];
 
 export function Marquee() {

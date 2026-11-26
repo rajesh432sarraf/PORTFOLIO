@@ -25,7 +25,7 @@ export const projects = [
     year: "2026",
     description:
       "Context-aware developer productivity copilot combining real-time code snippet generation, intelligent architecture planning, and automated debugging assistants.",
-    technologies: ["React", "Next.js", "Tailwind CSS", "LLMs", "FastAPI"],
+    technologies: ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express", "MongoDB"],
     live: "https://dev-duck-ai.vercel.app/",
     github: "https://github.com/rajesh432sarraf",
     featured: true,
@@ -37,8 +37,8 @@ export const projects = [
     category: "AI AGENTS / RESEARCH",
     year: "2025",
     description:
-      "3rd Place winner at the AI Agentic Hackathon. An autonomous knowledge synthesis workspace leveraging multi-agent workflows and vector retrieval to decompose complex topics into interconnected notes.",
-    technologies: ["Python", "FastAPI", "React", "AI Agents", "Vector Search", "LLMs"],
+      "3rd Place winner at the AI Agentic Hackathon. An autonomous knowledge synthesis workspace leveraging multi-agent workflows and REST-based LLM APIs to turn unstructured notes into structured summaries.",
+    technologies: ["Python", "React", "AI Agents", "LLMs", "REST APIs"],
     live: "",
     github: "https://github.com/rajesh432sarraf",
     featured: true,

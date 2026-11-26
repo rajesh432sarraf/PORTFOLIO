@@ -14,7 +14,7 @@
 
 </div>
 
-Built with a dark creative visual identity, oversized typography, Lenis smooth scrolling, Framer Motion editorial reveals, GSAP-enhanced interactions, magnetic controls, database integrations, and a secure Admin CMS.
+Built with a dark creative visual identity, oversized typography, smooth scrolling, editorial animations, magnetic controls, database integrations, and a secure Admin CMS.
 
 ---
 
@@ -24,7 +24,7 @@ Built with a dark creative visual identity, oversized typography, Lenis smooth s
 * **Core**: React 18 (JavaScript ES6+, Vite)
 * **Styling**: Tailwind CSS, Vanilla CSS design tokens
 * **Typography**: Kanit (Google Fonts weights 300–900)
-* **Motion & Animation**: Framer Motion, GSAP
+* **Motion & Animation**: Framer Motion
 * **Smooth Scrolling**: Lenis
 * **Icons**: Lucide React & Custom SVG marks
 

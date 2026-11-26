@@ -18,20 +18,20 @@ export const skillGroups = [
   {
     number: "03",
     title: "BACKEND",
-    skills: ["Node.js", "Express", "Flask", "FastAPI"],
-    description: "Server-side architectures, RESTful API design, and asynchronous request handling.",
+    skills: ["Node.js", "Express", "Flask", "Socket.io", "PHP"],
+    description: "Server-side architectures, RESTful API design, real-time messaging, and request handling.",
   },
   {
     number: "04",
     title: "DATABASE",
-    skills: ["MongoDB", "MySQL", "Supabase", "PostgreSQL"],
-    description: "Relational and NoSQL data modeling, query optimization, and persistent cloud storage.",
+    skills: ["MongoDB", "MySQL", "Supabase", "Firebase", "IndexedDB"],
+    description: "Relational, NoSQL, cloud backend, and offline browser storage with reliable data modeling.",
   },
   {
     number: "05",
-    title: "AI / DEVELOPMENT",
-    skills: ["RAG", "LLM APIs", "AI Agents", "REST APIs", "Git", "GitHub"],
-    description: "Applied generative AI workflows, intelligent retrieval systems, and collaborative version control.",
+    title: "TOOLS & AI WORKFLOWS",
+    skills: ["LLM APIs", "AI Agents", "REST APIs", "Postman", "Git", "GitHub"],
+    description: "Practical LLM API integrations, API testing, deployment workflows, and collaborative version control.",
   },
 ];
 

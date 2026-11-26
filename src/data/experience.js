@@ -23,8 +23,8 @@ export const experiences = [
     location: "VIGNAN UNIVERSITY, VADLAMUDI, GUNTUR, AP, INDIA",
     type: "HACKATHON",
     description:
-      "Led a team in developing ClearityNote AI, an autonomous research synthesis workspace utilizing multi-agent pipelines and vector search retrieval, securing 3rd Place out of competitive participating university teams.",
-    technologies: ["Python", "FastAPI", "Vector Search", "LLMs", "React"],
+      "Led a team in developing ClearityNote AI, an autonomous research synthesis workspace utilizing multi-agent pipelines and LLM API integrations, securing 3rd Place out of competitive participating university teams.",
+    technologies: ["React", "JavaScript", "Tailwind CSS", "LLMs", "REST APIs", "Git"],
   },
   {
     id: "inamingos-intern",
