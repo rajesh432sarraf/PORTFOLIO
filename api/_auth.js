@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 
-const SECRET_KEY = process.env.ADMIN_JWT_SECRET || 'rajesh_portfolio_master_secret_key_2026_unhackable';
+// Cryptographically secure secret key: uses environment secret or falls back to an ephemeral random 32-byte key (never a static hardcoded string)
+const SECRET_KEY = process.env.ADMIN_JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'sarrafrajesh432@gmail.com').toLowerCase().trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'apanatime';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 /**
  * Creates a cryptographically signed HMAC-SHA256 session token.

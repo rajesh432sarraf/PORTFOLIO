@@ -1,5 +1,33 @@
 import { verifyToken } from './_auth.js';
 
+// Rate limiting map: max 5 messages per 10 minutes per IP
+const contactAttemptMap = new Map();
+const MAX_CONTACT_ATTEMPTS = 5;
+const CONTACT_WINDOW_MS = 10 * 60 * 1000;
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.headers['x-real-ip'] || req.socket?.remoteAddress || '127.0.0.1';
+}
+
+function checkContactRateLimit(ip) {
+  const now = Date.now();
+  const record = contactAttemptMap.get(ip);
+  if (!record || now > record.resetAt) {
+    contactAttemptMap.set(ip, { count: 1, resetAt: now + CONTACT_WINDOW_MS });
+    return { allowed: true };
+  }
+  if (record.count >= MAX_CONTACT_ATTEMPTS) {
+    const minutesRemaining = Math.ceil((record.resetAt - now) / 60000);
+    return { allowed: false, minutesRemaining };
+  }
+  record.count += 1;
+  return { allowed: true };
+}
+
 const isMongoConfigured = (uri) =>
   Boolean(uri && uri.trim() && !uri.includes('<cluster>') && !uri.includes('<username>') && uri.startsWith('mongodb'));
 
@@ -94,6 +122,15 @@ export default async function handler(req, res) {
   // Only accept POST requests for submissions
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Rate-limiting check per client IP
+  const clientIp = getClientIp(req);
+  const rateLimit = checkContactRateLimit(clientIp);
+  if (!rateLimit.allowed) {
+    return res.status(429).json({
+      error: `Too many submissions from this IP. Please wait ${rateLimit.minutesRemaining} minute(s) before sending another message.`,
+    });
   }
 
   try {

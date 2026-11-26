@@ -1,10 +1,24 @@
 import { verifyToken } from './_auth.js';
 
+// Strict whitelist of public dynamic portfolio collections (prevents accessing sensitive collections like messages/admin)
+const ALLOWED_CONTENT_TYPES = [
+  'projects',
+  'skills',
+  'experience',
+  'achievements',
+  'certificates',
+  'resume',
+];
+
 const isMongoConfigured = (uri) =>
   Boolean(uri && uri.trim() && !uri.includes('<cluster>') && !uri.includes('<username>') && uri.startsWith('mongodb'));
 
 export default async function handler(req, res) {
   const type = req.query?.type || req.body?.type || 'projects';
+
+  if (!ALLOWED_CONTENT_TYPES.includes(type)) {
+    return res.status(400).json({ success: false, error: 'Access Denied: Invalid or restricted content type.' });
+  }
 
   // Handle GET request to retrieve dynamic content (Public read-only)
   if (req.method === 'GET') {
