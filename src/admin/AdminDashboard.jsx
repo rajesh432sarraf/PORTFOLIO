@@ -92,18 +92,10 @@ export function AdminDashboard({ onLogout }) {
     <div className="min-h-screen w-full bg-[#080808] text-[#D7E2EA] flex flex-col">
       {/* Top Admin Header Bar */}
       <header className="w-full bg-[#0C0C0C] border-b border-white/10 px-6 py-4 flex items-center justify-between z-20">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 text-white/70">
-            <Shield className="w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold uppercase tracking-wider text-white font-kanit">
-              RAJESH KUMAR CMS
-            </h1>
-            <span className="text-[10px] font-mono text-white/40 block">
-              Logged in as {adminEmail}
-            </span>
-          </div>
+        <div className="flex items-center">
+          <h1 className="font-kanit font-black text-lg sm:text-xl tracking-wider uppercase brand-gradient-flow select-none">
+            RAJESH KUMAR CMS
+          </h1>
         </div>
 
         <div className="flex items-center gap-4">
