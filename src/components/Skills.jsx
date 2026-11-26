@@ -1,9 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SkillRow from './SkillRow.jsx';
 import FadeIn from './FadeIn.jsx';
-import { skillGroups } from '../data/skills.js';
+import { skillGroups as initialSkillGroups } from '../data/skills.js';
+import { fetchContentFromDatabase } from '../services/storageService.js';
 
 export function Skills() {
+  const [skillList, setSkillList] = useState(initialSkillGroups);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSkills = async () => {
+      try {
+        const data = await fetchContentFromDatabase('skills', initialSkillGroups);
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setSkillList(data);
+        }
+      } catch (e) {
+        console.warn('Failed to load skills from database:', e);
+      }
+    };
+
+    loadSkills();
+
+    const handleUpdate = async () => {
+      try {
+        const data = await fetchContentFromDatabase('skills', initialSkillGroups);
+        if (Array.isArray(data) && data.length > 0) {
+          setSkillList(data);
+        }
+      } catch (e) {
+        console.warn('Failed to refresh skills:', e);
+      }
+    };
+
+    window.addEventListener('portfolio_data_updated', handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('portfolio_data_updated', handleUpdate);
+    };
+  }, []);
+
   return (
     <section
       id="skills"
@@ -30,8 +66,8 @@ export function Skills() {
 
         {/* Skill Groups Stack */}
         <div className="border-t border-white/[0.08]">
-          {skillGroups.map((group, index) => (
-            <SkillRow key={group.number} group={group} index={index} />
+          {skillList.map((group, index) => (
+            <SkillRow key={group.id || group.number || index} group={group} index={index} />
           ))}
         </div>
       </div>

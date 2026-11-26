@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 
 export function SkillRow({ group, index }) {
+  const skillList = Array.isArray(group.skills)
+    ? group.skills
+    : typeof group.skills === 'string'
+    ? group.skills.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -40,9 +46,9 @@ export function SkillRow({ group, index }) {
 
           {/* Skill Pills */}
           <div className="flex flex-wrap gap-2 sm:gap-2.5 max-w-xl">
-            {group.skills.map((skill) => (
+            {skillList.map((skill, sIdx) => (
               <span
-                key={skill}
+                key={`${skill}-${sIdx}`}
                 className="px-3.5 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-xs sm:text-sm text-[#D7E2EA]/85 font-medium tracking-wide transition-all duration-200 group-hover:border-white/20 group-hover:bg-white/[0.06]"
               >
                 {skill}

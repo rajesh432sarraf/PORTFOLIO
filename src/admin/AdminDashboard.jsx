@@ -6,6 +6,7 @@ import {
   Trophy,
   Award,
   FileText,
+  Code,
   LogOut,
   ExternalLink,
   Shield,
@@ -22,9 +23,10 @@ import ExperienceManager from './ExperienceManager.jsx';
 import AchievementManager from './AchievementManager.jsx';
 import CertificateManager from './CertificateManager.jsx';
 import ResumeManager from './ResumeManager.jsx';
+import SkillManager from './SkillManager.jsx';
 
 export function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('projects'); // 'projects' | 'messages' | 'experience' | 'achievements' | 'certifications' | 'security'
+  const [activeTab, setActiveTab] = useState('projects'); // 'projects' | 'skills' | 'messages' | 'experience' | 'achievements' | 'certifications' | 'resume' | 'security'
   const [adminEmail, setAdminEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [emailMsg, setEmailMsg] = useState({ text: '', type: '' });
@@ -142,6 +144,19 @@ export function AdminDashboard({ onLogout }) {
 
           <button
             type="button"
+            onClick={() => setActiveTab('skills')}
+            className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
+              activeTab === 'skills'
+                ? 'bg-white text-black font-bold shadow-lg'
+                : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+            }`}
+          >
+            <Code className="w-4 h-4 text-cyan-400" />
+            <span>Skills</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('messages')}
             className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === 'messages'
@@ -222,6 +237,7 @@ export function AdminDashboard({ onLogout }) {
         {/* Main Content Area */}
         <main className="flex-1">
           {activeTab === 'projects' && <ProjectManager />}
+          {activeTab === 'skills' && <SkillManager />}
           {activeTab === 'messages' && <MessageManager />}
 
           {activeTab === 'experience' && <ExperienceManager />}
