@@ -254,9 +254,6 @@ export function ProjectManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Projects Management &amp; Showcase
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Connected to MongoDB Database. Real-time persistent cloud storage across reloads.
-          </p>
         </div>
 
         <button

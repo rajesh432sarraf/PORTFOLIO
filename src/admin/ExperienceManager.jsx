@@ -152,9 +152,6 @@ export function ExperienceManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Experience Management
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Add, update, and manage your internships, work roles, and professional contributions.
-          </p>
         </div>
 
         <button

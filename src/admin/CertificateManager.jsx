@@ -169,9 +169,6 @@ export function CertificateManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Certifications &amp; Credentials
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Add and manage your certificates, specialized courses, and credentials.
-          </p>
         </div>
         <button
           type="button"

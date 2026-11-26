@@ -181,9 +181,6 @@ export function AchievementManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Achievements &amp; Hackathons
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Showcase your hackathon wins, recognitions, and project achievements.
-          </p>
         </div>
         <button
           type="button"

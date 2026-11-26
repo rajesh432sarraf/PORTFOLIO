@@ -78,9 +78,6 @@ export function MessageManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Contact Submissions &amp; Inquiries
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Client messages and contact inquiries submitted by users through your live portfolio website.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">

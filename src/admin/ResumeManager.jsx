@@ -211,9 +211,6 @@ export function ResumeManager() {
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white font-kanit">
             Resume &amp; CV Management
           </h2>
-          <p className="text-xs font-mono text-white/50 mt-1">
-            Upload new resume PDF or link cloud document.
-          </p>
         </div>
 
         {/* Live Preview Button */}

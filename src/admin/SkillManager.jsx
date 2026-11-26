@@ -233,9 +233,6 @@ export function SkillManager() {
           <h2 className="text-xl font-bold uppercase tracking-tight text-white font-kanit">
             Skills &amp; Capabilities Management
           </h2>
-          <p className="text-xs font-mono text-white/50">
-            Add, edit, reorder, and manage your technical skill categories and pills.
-          </p>
         </div>
 
         <button

@@ -68,9 +68,6 @@ export function AdminLogin({ onLoginSuccess }) {
           <h1 className="text-2xl font-bold uppercase tracking-tight text-white font-kanit">
             ADMIN CMS PORTAL
           </h1>
-          <p className="text-xs font-mono uppercase tracking-widest text-[#D7E2EA]/50 mt-1">
-            Rajesh Kumar Portfolio Management
-          </p>
         </div>
 
         {/* Login Card */}
@@ -146,8 +143,7 @@ export function AdminLogin({ onLoginSuccess }) {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-[#D7E2EA]/40">
-            <span>Portfolio CMS</span>
+          <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-end text-[11px] font-mono text-[#D7E2EA]/40">
             <a href="/" className="hover:text-white transition-colors">
               ← Return to Site
             </a>
